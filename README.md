@@ -8,77 +8,23 @@ the computation power of Python and Jupyter ecosystem.
 
 ## Install
 ---------
-- ` git clone https://github.com/johnomernik/qgrid`
+- ` git clone https://github.com/xellgrid/XellGrid`
 - `cd qgrid`
 - `python setup.py install`
 - `pip install qgrid2-1.1.3-py3-none-any.whl`
 - `cd ..`
 
-At this point, it worked for me with:
-
-- Python 3.9
-- JupyterLab 3.2.1
-- ipywidgets 7.6.5
-
-Note: I did not require Node JS to get this working, just the commands above made it work as I prebuilt the extension. 
 
 
 # Old Pre Late-October 2021 Quantopian Qgrid README:
 
 
 
-=====
-qgrid
-=====
-Qgrid is a Jupyter notebook widget which uses `SlickGrid <https://github.com/mleibman/SlickGrid>`_ to render pandas
-DataFrames within a Jupyter notebook. This allows you to explore your DataFrames with intuitive scrolling, sorting, and
-filtering controls, as well as edit your DataFrames by double clicking cells.
 
-Qgrid was developed for use in `Quantopian's hosted research environment
-<https://www.quantopian.com/posts/qgrid-now-available-in-research-an-interactive-grid-for-sorting-and-filtering-dataframes?utm_source=github&utm_medium=web&utm_campaign=qgrid-repo>`_
-and is available for use in that environment as of June 2018.
-Quantopian also offers a `fully managed service for professionals <https://factset.quantopian.com>`_
-that includes Qgrid, Zipline, Alphalens, Pyfolio, FactSet data, and more.
 
-Announcements: Qgrid Webinar
-----------------------------
-Qgrid author Tim Shawver recently did a live webinar about Qgrid, and the recording of the webinar is `now available on YouTube <https://www.youtube.com/watch?v=AsJJpgwIX0Q>`_.
 
-This talk will be interesting both for people that are new to Qgrid, as well as longtime fans that are interested in learning more about the project.
 
-Demo
-----
-Click the badge below to try out the latest beta of qgrid in Quantopian's hosted research environment. If you're already signed into Quantopian you'll be brought directly to the demo notebook. Otherwise you'll be prompted to register (it's free):
 
-.. image:: https://img.shields.io/badge/launch-quantopian-red.svg?colorB=d33015
-    :target: https://www.quantopian.com/clone_notebook?id=5b2baee1b3d6870048620188&utm_source=github&utm_medium=web&utm_campaign=qgrid-repo
-|
-Click the badge below to try out qgrid using binder:
-
-.. image:: https://beta.mybinder.org/badge.svg
-    :target: https://mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?filepath=index.ipynb
-|
-Click the following badge to try out qgrid in Jupyterlab, also using binder:
-
-.. image:: https://mybinder.org/badge.svg
-    :target: https://mybinder.org/v2/gh/quantopian/qgrid-notebooks/master?urlpath=lab
-|
-*For both binder links, you'll see a brief loading screen while a server is being created for you in the cloud.  This shouldn't take more than a minute, and usually completes in under 10 seconds.*
-
-*The binder demos generally will be using the most recent stable release of qgrid, so features that were added in a recent beta version may not be available in those demos.*
-
-For people who would rather not go to another page to try out qgrid for real, here's the tldr; version:
-
-        .. figure:: docs/images/filtering_demo.gif
-         :align: left
-         :target: docs/images/filtering_demo.gif
-         :width: 200px
-
-          A brief demo showing filtering, editing, and the `get_changed_df()` method
-
-API Documentation
------------------
-API documentation is hosted on `readthedocs <http://qgrid.readthedocs.io/en/latest/>`_.
 
 Installation
 ------------
