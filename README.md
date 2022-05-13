@@ -1,6 +1,6 @@
-# Movellab Spreadsheet
+# XellGrid
 
-Movellab Spreadsheet is a successor of discontinued Qgrid with added support to JupyterLab and 
+XellGrid is a successor of discontinued Qgrid with added support to JupyterLab and 
 enhanced UI.  
 
 Our plan is to add more "Excel" like features to enable "low code/no code" users to benefit from 
