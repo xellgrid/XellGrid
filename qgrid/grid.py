@@ -49,7 +49,7 @@ class _DefaultSettings(object):
             'editable': True,
             'autoEdit': False,
             'explicitInitialization': True,
-            'maxVisibleRows': 15,
+            'maxVisibleRows': 10,
             'minVisibleRows': 8,
             'sortable': True,
             'filterable': True,
@@ -139,7 +139,7 @@ def set_defaults(show_toolbar=None,
                  grid_options=None,
                  column_options=None):
     """
-    Set the default qgrid options.  The options that you can set here are the
+    Set the default XellGrid options.  The options that you can set here are the
     same ones that you can pass into ``QgridWidget`` constructor, with the
     exception of the ``df`` option, for which a default value wouldn't be
     particularly useful (since the purpose of qgrid is to display a DataFrame).
