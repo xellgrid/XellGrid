@@ -5,7 +5,20 @@ node_modules/
 *.egg-info/
 .ipynb_checkpoints
 *.tsbuildinfo
-qgrid2/labextension
+qgrid/qgrid2/labextension
+qgrid/.ipynb_checkpoints
+qgrid/dask-worker-space
+qgrid/static
+
+js/.github
+js/.ipynb_checkpoints
+js/_temp_extension
+js/dask-worker-space
+js/dist
+js/lib
+js/node_modules
+js/qgrid2.egg-info
+js/qgrid2/labextension
 
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python
@@ -111,3 +124,10 @@ dmypy.json
 
 # OSX files
 .DS_Store
+
+.idea
+*.ipynb
+dask-worker-space
+dist
+build
+
