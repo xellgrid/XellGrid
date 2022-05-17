@@ -40,6 +40,7 @@ defaults = DefaultSettings()
 handlers = EventHandlers()
 
 
+
 def set_defaults(show_toolbar=None,
                  precision=None,
                  grid_options=None,
