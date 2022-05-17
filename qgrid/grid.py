@@ -16,15 +16,14 @@ from traitlets import (
     Dict,
     List,
     Tuple,
-    Any,
-    All,
-    parse_notifier_name
+    Any
 )
-from itertools import chain
+
 from uuid import uuid4
 from six import string_types
 
-from .grid_default_settings import _DefaultSettings
+from .grid_default_settings import DefaultSettings
+from .grid_event_handlers import EventHandlers
 
 # versions of pandas prior to version 0.20.0 don't support the orient='table'
 # when calling the 'to_json' function on DataFrames.  to get around this we
@@ -37,36 +36,8 @@ from .grid_default_settings import _DefaultSettings
 #    from . import pd_json
 
 
-class _EventHandlers(object):
-
-    def __init__(self):
-        self._listeners = {}
-
-    def on(self, names, handler):
-        names = parse_notifier_name(names)
-        for n in names:
-            self._listeners.setdefault(n, []).append(handler)
-
-    def off(self, names, handler):
-        names = parse_notifier_name(names)
-        for n in names:
-            try:
-                if handler is None:
-                    del self._listeners[n]
-                else:
-                    self._listeners[n].remove(handler)
-            except KeyError:
-                pass
-
-    def notify_listeners(self, event, qgrid_widget):
-        event_listeners = self._listeners.get(event['name'], [])
-        all_listeners = self._listeners.get(All, [])
-        for c in chain(event_listeners, all_listeners):
-            c(event, qgrid_widget)
-
-
-defaults = _DefaultSettings()
-handlers = _EventHandlers()
+defaults = DefaultSettings()
+handlers = EventHandlers()
 
 
 def set_defaults(show_toolbar=None,
@@ -536,7 +507,7 @@ class QgridWidget(widgets.DOMWidget):
     _row_count = Integer(0, sync=True)
     _sort_field = Any(None, sync=True)
     _sort_ascending = Bool(True, sync=True)
-    _handlers = Instance(_EventHandlers)
+    _handlers = Instance(EventHandlers)
 
     df = Instance(pd.DataFrame)
     precision = Integer(6, sync=True)
@@ -554,7 +525,7 @@ class QgridWidget(widgets.DOMWidget):
         # register a callback for custom messages
         self.on_msg(self._handle_qgrid_msg)
         self._initialized = True
-        self._handlers = _EventHandlers()
+        self._handlers = EventHandlers()
 
         handlers.notify_listeners({
             'name': 'instance_created'

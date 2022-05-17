@@ -1,4 +1,4 @@
-class _DefaultSettings(object):
+class DefaultSettings(object):
 
     def __init__(self):
         self._grid_options = {
