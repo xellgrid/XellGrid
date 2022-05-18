@@ -2,11 +2,11 @@ var widgets = require('@jupyter-widgets/base');
 var _ = require('underscore');
 var moment = require('moment');
 window.$ = window.jQuery = require('jquery');
-var date_filter = require('./qgrid.datefilter.js');
-var slider_filter = require('./qgrid.sliderfilter.js');
-var text_filter = require('./qgrid.textfilter.js');
-var boolean_filter = require('./qgrid.booleanfilter.js');
-var editors = require('./qgrid.editors.js');
+var date_filter = import('./qgrid.datefilter.js');
+var slider_filter = import('./qgrid.sliderfilter.js');
+var text_filter = import('./qgrid.textfilter.js');
+var boolean_filter = import('./qgrid.booleanfilter.js');
+var editors = import('./qgrid.editors.js');
 var dialog = null;
 
 //try {

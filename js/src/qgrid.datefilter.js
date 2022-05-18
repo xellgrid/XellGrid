@@ -1,5 +1,5 @@
 var $ = require('jquery');
-var filter_base = require('./qgrid.filterbase.js');
+var filter_base = import('./qgrid.filterbase.js');
 
 class DateFilter extends filter_base.FilterBase {
 
