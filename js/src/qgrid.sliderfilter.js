@@ -1,4 +1,4 @@
-var filter_base = require('./qgrid.filterbase.js');
+var filter_base = import('./qgrid.filterbase.js');
 
 class SliderFilter extends filter_base.FilterBase {
 

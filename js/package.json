@@ -6,7 +6,9 @@
     "name": "Quantopian Inc.",
     "email": "some@some.com"
   },
-  "main": "src/index.js",
+  "main": "lib/index.js",
+  "types": "lib/index.d.ts",
+  "style": "style/index.css",
   "homepage": "Doesnot exist",
   "repository": {
     "type": "git",
@@ -73,6 +75,7 @@
     "jquery-ui-dist": "^1.12.1",
     "moment": "^2.24.0",
     "slickgrid": "2.4.44",
+    "ts-loader": "~8.2.0",
     "underscore": "^1.9.2"
   },
   "jshintConfig": {

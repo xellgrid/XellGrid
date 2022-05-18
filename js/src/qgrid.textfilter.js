@@ -1,6 +1,6 @@
 var $ = require('jquery');
 var _ = require('underscore');
-var filter_base = require('./qgrid.filterbase.js');
+var filter_base = import('./qgrid.filterbase.js');
 
 class TextFilter extends filter_base.FilterBase {
 
