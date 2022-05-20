@@ -7,6 +7,11 @@ var webpack = require('webpack');
 var rules = [
     { test: /\.css$/, use: ['style-loader', 'css-loader']},
     { test: /\.(jpe?g|png|gif|svg)$/i, use: ['file-loader']},
+    { 
+        test: /\.(js|ts)$/,
+        use: ['ts-loader'],
+        exclude: /node_modules/,
+    },
     {
         test: require.resolve('jquery'),
         use: [{
@@ -39,11 +44,14 @@ module.exports = [
         entry: './src/extension.js',
         output: {
             filename: 'extension.js',
-            path: path.resolve(__dirname, '..', 'qgrid', 'static'),
+            path: path.resolve(__dirname, 'lib'),
             libraryTarget: 'amd'
         },
         plugins: plugins,
         mode: 'production'
+        resolve: {
+            extensions: ['.ts', '.js']
+        }
     },
     {// Bundle for the notebook containing the custom widget views and models
      //
@@ -51,10 +59,10 @@ module.exports = [
      // custom widget.
      // It must be an amd module
      //
-        entry: './src/index.js',
+        entry: './src/index.ts',
         output: {
             filename: 'index.js',
-            path: path.resolve(__dirname, '..', 'qgrid', 'static'),
+            path: path.resolve(__dirname, 'lib'),
             libraryTarget: 'amd'
         },
         devtool: 'source-map',
@@ -79,7 +87,7 @@ module.exports = [
      // The target bundle is always `dist/index.js`, which is the path required
      // by the custom widget embedder.
      //
-        entry: './src/embed.js',
+        entry: './src/embed.ts',
         output: {
             filename: 'index.js',
             path: path.resolve(__dirname, './dist/'),

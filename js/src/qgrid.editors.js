@@ -7,7 +7,7 @@
 var $ = require('jquery');
 require('slickgrid/slick.editors.js');
 
-class IndexEditor {
+export class IndexEditor {
   constructor(args){
     this.column_info = args.column;
     this.$cell = $(args.container);
@@ -52,7 +52,7 @@ class IndexEditor {
 }
 
 //  http://stackoverflow.com/a/22118349
-class SelectEditor {
+export class SelectEditor {
   constructor(args) {
     this.column_info = args.column;
     this.options = [];
@@ -118,7 +118,7 @@ class SelectEditor {
 /**
  * Validator for numeric cells.
  */
-var validateNumber = (value) => {
+export var validateNumber = (value) => {
   if (isNaN(value)) {
     return {
       valid: false,

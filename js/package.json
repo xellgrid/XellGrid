@@ -22,7 +22,8 @@
   ],
   "license": "BSD-3",
   "scripts": {
-    "build": "jlpm run build:lib && jlpm run build:labextension:dev",
+    "build": "jlpm run prepare && jlpm run build:labextension:dev",
+    "webpack": "webpack build",
     "build:labextension": "jupyter labextension build .",
     "build:labextension:dev": "jupyter labextension build --development True .",
     "build:lib": "tsc",
@@ -37,6 +38,7 @@
     "prepare": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1",
     "watch": "run-p watch:src watch:labextension",
+    "watch_wp": "webpack --watch",
     "watch:labextension": "jupyter labextension watch .",
     "watch:src": "tsc -w"
   },
@@ -86,10 +88,11 @@
     "src/*.js",
     "src/*.css",
     "src/images/",
-    "style/index.js"
+    "style/index.js",
+    "src/*.ts"
   ],
   "jupyterlab": {
-    "extension": "src/jupyterlab-plugin",
+    "extension": true,
     "outputDir": "qgrid2/labextension"
   },
   "styleModule": "style/index.js"
