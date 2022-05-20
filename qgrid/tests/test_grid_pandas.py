@@ -242,9 +242,6 @@ def test_period_object_column():
         {"type": "change_sort", "sort_field": "index", "sort_ascending": True}
     )
     view._handle_qgrid_msg_helper(
-        {"type": "show_filter_dropdown", "field": "index", "search_val": None}
-    )
-    view._handle_qgrid_msg_helper(
         {"type": "change_sort", "sort_field": "b", "sort_ascending": True}
     )
     view._handle_qgrid_msg_helper(
