@@ -1,6 +1,6 @@
 var $ = require('jquery');
 
-class FilterBase {
+export class FilterBase {
   constructor(field, column_type, qgrid) {
     this.field = field;
     this.column_type = column_type;
