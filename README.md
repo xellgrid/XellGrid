@@ -1,4 +1,3 @@
-<meta name="google-site-verification" content="AADifpfNhNUvSXTMFN_RC5x4UhHK4uU_XIA8DQyanx0" />
 # XellGrid
 
 XellGrid is a project branched out of the discontinued Qgrid project. The first release of XellGrid is to add support to JupyterLab with enhanced UI.  
