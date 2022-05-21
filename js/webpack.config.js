@@ -48,10 +48,11 @@ module.exports = [
             libraryTarget: 'amd'
         },
         plugins: plugins,
-        mode: 'production'
         resolve: {
             extensions: ['.ts', '.js']
-        }
+        },
+        mode: 'production'
+        
     },
     {// Bundle for the notebook containing the custom widget views and models
      //
