@@ -2,7 +2,7 @@ var $ = require('jquery');
 var _ = require('underscore');
 var filter_base = require('./qgrid.filterbase.js');
 
-class TextFilter extends filter_base.FilterBase {
+export class TextFilter extends filter_base.FilterBase {
 
   get_filter_html() {
     return `
