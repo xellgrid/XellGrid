@@ -49,7 +49,7 @@ var MainMenu = function () {
 
     $.extend(settings, p);
 
-    $mask = $('#menu-top-mask');
+    var $mask = $('#menu-top-mask');
 
     $('ul.main-menu > li').click(function (event) {
       var target = $(event.target);
@@ -70,7 +70,7 @@ var MainMenu = function () {
 
     $('ul.main-menu > li > ul li').mouseenter(function (e) {
       // Hide all other opened submenus in same level of this item
-      $el = $(e.target);
+      var $el = $(e.target);
       if ($el.hasClass('separator')) return;
       clearTimeout(timeOut);
       var parent = $el.closest('ul');
@@ -78,7 +78,7 @@ var MainMenu = function () {
         if ($(this) != $el)
           $(this).removeClass('active-sub-menu').hide();
       });
-
+      
       // Show submenu of selected item
       if ($el.children().length > 0) {
         timeOut = setTimeout(function () { toggleSubMenu($el) }, 500);
@@ -97,7 +97,7 @@ var MainMenu = function () {
 
     //#region - Toggle Main Menu Item -
 
-    toggleMenuItem = function (el) {
+    var toggleMenuItem = function (el) {
 
       // Hide all open submenus
       $('.active-sub-menu').removeClass('active-sub-menu').hide();
@@ -146,7 +146,7 @@ var MainMenu = function () {
 
     //#region - Toggle Sub Menu Item -
 
-    toggleSubMenu = function (el) {
+    var toggleSubMenu = function (el) {
 
       if (el.hasClass(settings.disabledClass)) {
         return;
@@ -176,7 +176,7 @@ var MainMenu = function () {
 
     //#endregion
 
-    closeMainMenu = function () {
+    var closeMainMenu = function () {
       activated = false;
       $('.active-menu').find("ul:first").hide();
       $('.active-menu').removeClass('active-menu');

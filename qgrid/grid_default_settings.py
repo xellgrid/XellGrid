@@ -1,6 +1,5 @@
 import pandas as pd
 
-
 class DefaultSettings(object):
 
     def __init__(self):

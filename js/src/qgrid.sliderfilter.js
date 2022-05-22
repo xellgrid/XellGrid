@@ -1,6 +1,6 @@
 var filter_base = require('./qgrid.filterbase.js');
 
-class SliderFilter extends filter_base.FilterBase {
+export class SliderFilter extends filter_base.FilterBase {
 
   get_filter_html() {
     return `
