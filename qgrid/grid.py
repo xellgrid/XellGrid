@@ -552,6 +552,9 @@ class QgridWidget(widgets.DOMWidget):
                 if sort_column_name:
                     series_to_set = df[sort_column_name]
                 else:
+                    temp = self._get_col_series_from_df(
+                        col_name, df, level_vals=True
+                    )
                     series_to_set = self._get_col_series_from_df(
                         col_name, df, level_vals=True
                     ).to_timestamp()
@@ -1174,7 +1177,7 @@ class QgridWidget(widgets.DOMWidget):
 
     def _add_empty_row(self):
         self._df = pd.DataFrame([[np.nan] * len(self._df.columns)], columns=self._df.columns).concat(self._df, ignore_index=True)
-
+        
         self._update_table(
             triggered_by="add_row", scroll_to_row=1
         )
