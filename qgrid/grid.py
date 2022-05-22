@@ -1,6 +1,5 @@
 import ipywidgets as widgets
-import modin.pandas as pd
-import pandas
+import pandas as pd
 import numpy as np
 import json
 import warnings
@@ -890,7 +889,7 @@ class QgridWidget(widgets.DOMWidget):
                     cur_column['type'] = 'interval'
                     self._interval_columns.append(col_name)
 
-                if 'freq' in cur_column:
+                if 'freq' in cur_column and cur_column['type'] == 'periodindex':
                     self._period_columns.append(col_name)
 
                 if col_name in self._primary_key:
@@ -939,6 +938,9 @@ class QgridWidget(widgets.DOMWidget):
                 if sort_column_name:
                     series_to_set = df[sort_column_name]
                 else:
+                    temp = self._get_col_series_from_df(
+                        col_name, df, level_vals=True
+                    )
                     series_to_set = self._get_col_series_from_df(
                         col_name, df, level_vals=True
                     ).to_timestamp()
@@ -1526,7 +1528,7 @@ class QgridWidget(widgets.DOMWidget):
         if row is None:
             added_index = self._add_empty_row()
         else:
-            added_index = self._add_empty_row()
+            added_index = self._add_row(row)
 
         self._notify_listeners(
             {"name": "row_added", "index": added_index, "source": "api"}
@@ -1561,10 +1563,8 @@ class QgridWidget(widgets.DOMWidget):
 
     def _add_empty_row(self):
         print("add empty row")
-        print(self._selected_rows)
         df = self._df
         df1 = pd.DataFrame([[np.nan] * len(df.columns)], columns=df.columns)
-        print("step 2")
         df2 = df1.append(df, ignore_index=True)
         self._df = df2
         print(df2.shape)

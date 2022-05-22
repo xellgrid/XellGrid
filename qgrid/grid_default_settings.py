@@ -1,3 +1,5 @@
+import pandas as pd
+
 class DefaultSettings(object):
 
     def __init__(self):
@@ -58,7 +60,7 @@ class DefaultSettings(object):
 
     @property
     def precision(self):
-        return 6
+        return self._precision or pd.get_option('display.precision') - 1
 
     @property
     def column_options(self):
