@@ -14,8 +14,8 @@ class DefaultSettings(object):
             'editable': True,
             'autoEdit': False,
             'explicitInitialization': True,
-            'maxVisibleRows': 8,
-            'minVisibleRows': 8,
+            'maxVisibleRows': 10,
+            'minVisibleRows': 10,
             'sortable': True,
             'filterable': True,
             'highlightSelectedCell': False,
@@ -65,3 +65,60 @@ class DefaultSettings(object):
     @property
     def column_options(self):
         return self._column_options
+
+
+def set_defaults(show_toolbar=None,
+                 precision=None,
+                 grid_options=None,
+                 column_options=None):
+    """
+     Set the default XellGrid options.  The options that you can set here are the
+    same ones that you can pass into ``QgridWidget`` constructor, with the
+    exception of the ``df`` option, for which a default value wouldn't be
+    particularly useful (since the purpose of qgrid is to display a DataFrame).
+
+    See the documentation for ``QgridWidget`` for more information.
+
+    Notes
+    -----
+    This function will be useful to you if you find yourself
+    setting the same options every time you create a QgridWidget. Calling
+    this ``set_defaults`` function once sets the options for the lifetime of
+    the kernel, so you won't have to include the same options every time you
+    instantiate a ``QgridWidget``.
+
+    See Also
+    --------
+    QgridWidget :
+        The widget whose default behavior is changed by ``set_defaults``.
+    """
+    defaults.set_defaults(show_toolbar=show_toolbar,
+                          precision=precision,
+                          grid_options=grid_options,
+                          column_options=column_options)
+
+
+def set_grid_option(optname, optvalue):
+    """
+    Set the default value for one of the options that gets passed into the
+    SlickGrid constructor.
+
+    Parameters
+    ----------
+    optname : str
+        The name of the option to set.
+    optvalue : object
+        The new value to set.
+
+    Notes
+    -----
+    The options you can set here are the same ones
+    that you can set via the ``grid_options`` parameter of the ``set_defaults``
+    or ``show_grid`` functions.  See the `SlickGrid documentation
+    <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_ for the full
+    list of available options.
+    """
+    defaults.grid_options[optname] = optvalue
+
+
+defaults = DefaultSettings()
