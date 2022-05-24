@@ -17,10 +17,10 @@ from traitlets import (
 )
 
 from uuid import uuid4
-from six import string_types
 
 from .grid_default_settings import defaults
 from .grid_event_handlers import EventHandlers, handlers
+from .grid_utils import stringify
 
 # versions of pandas prior to version 0.20.0 don't support the orient='table'
 # when calling the 'to_json' function on DataFrames.  to get around this we
@@ -36,15 +36,8 @@ from .grid_event_handlers import EventHandlers, handlers
 PAGE_SIZE = 100
 
 
-def stringify(x):
-    if isinstance(x, string_types):
-        return x
-    else:
-        return str(x)
-
-
 @widgets.register()
-class QgridWidget(widgets.DOMWidget):
+class XellgridWidget(widgets.DOMWidget):
     """
     The widget class which is instantiated by the ``show_grid`` method. This
     class can be constructed directly but that's not recommended because
@@ -58,9 +51,9 @@ class QgridWidget(widgets.DOMWidget):
 
     See Also
     --------
-    show_grid : The method that should be used to construct QgridWidget
+    show_grid : The method that should be used to construct XellgridWidget
                 instances, because it provides reasonable defaults for all
-                of the qgrid options.
+                of the XellGrid options.
 
     Attributes
     ----------
@@ -84,10 +77,10 @@ class QgridWidget(widgets.DOMWidget):
 
     """
 
-    _view_name = Unicode('QgridView').tag(sync=True)
-    _model_name = Unicode('QgridModel').tag(sync=True)
-    _view_module = Unicode('qgrid').tag(sync=True)
-    _model_module = Unicode('qgrid').tag(sync=True)
+    _view_name = Unicode('XellgridView').tag(sync=True)
+    _model_name = Unicode('XellgridModel').tag(sync=True)
+    _view_module = Unicode('xellgrid').tag(sync=True)
+    _model_module = Unicode('xellgrid').tag(sync=True)
     _view_module_version = Unicode('^1.1.3').tag(sync=True)
     _model_module_version = Unicode('^1.1.3').tag(sync=True)
 
@@ -108,8 +101,8 @@ class QgridWidget(widgets.DOMWidget):
     _initialized = Bool(False)
     _ignore_df_changed = Bool(False)
     _unfiltered_df = Instance(pd.DataFrame)
-    _index_col_name = Unicode('qgrid_unfiltered_index', sync=True)
-    _sort_col_suffix = Unicode('_qgrid_sort_column')
+    _index_col_name = Unicode('xellgrid_unfiltered_index', sync=True)
+    _sort_col_suffix = Unicode('_xellgrid_sort_column')
     _multi_index = Bool(False, sync=True)
     _edited = Bool(False)
     _selected_rows = List([])
@@ -135,9 +128,9 @@ class QgridWidget(widgets.DOMWidget):
     def __init__(self, *args, **kwargs):
         self.id = str(uuid4())
         self._initialized = False
-        super(QgridWidget, self).__init__(*args, **kwargs)
+        super(XellgridWidget, self).__init__(*args, **kwargs)
         # register a callback for custom messages
-        self.on_msg(self._handle_qgrid_msg)
+        self.on_msg(self._handle_xellgrid_msg)
         self._initialized = True
         self._handlers = EventHandlers()
 
@@ -170,15 +163,15 @@ class QgridWidget(widgets.DOMWidget):
             str, the handler will apply just the event with that name.
         handler : callable
             A callable that is called when the event occurs. Its
-            signature should be ``handler(event, qgrid_widget)``, where
-            ``event`` is a dictionary and ``qgrid_widget`` is the QgridWidget
+            signature should be ``handler(event, xellgrid_widget)``, where
+            ``event`` is a dictionary and ``xellgrid_widget`` is the XellgridWidget
             instance that fired the event. The ``event`` dictionary at least
             holds a ``name`` key which specifies the name of the event that
             occurred.
 
         Notes
         -----
-        Here's the list of events that you can listen to on QgridWidget
+        Here's the list of events that you can listen to on XellgridWidget
         instances via the ``on`` method::
 
             [
@@ -217,7 +210,7 @@ class QgridWidget(widgets.DOMWidget):
             * **column** The name of the column for which the filter control
               was shown.
 
-        * **json_updated** A user action causes QgridWidget to send rows of
+        * **json_updated** A user action causes XellgridWidget to send rows of
           data (in json format) down to the browser. This happens as a side
           effect of certain actions such as scrolling, sorting, and filtering.
 
@@ -293,9 +286,9 @@ class QgridWidget(widgets.DOMWidget):
         --------
         on :
             Same as the instance-level ``on`` method except it listens for
-            events on all instances rather than on an individual QgridWidget
+            events on all instances rather than on an individual XellgridWidget
             instance.
-        QgridWidget.off:
+        XellgridWidget.off:
             Unhook a handler that was hooked up using the instance-level
             ``on`` method.
 
@@ -304,7 +297,7 @@ class QgridWidget(widgets.DOMWidget):
 
     def off(self, names, handler):
         """
-        Remove a qgrid event handler that was registered with the current
+        Remove a xellgrid event handler that was registered with the current
         instance's ``on`` method.
 
         Parameters
@@ -319,7 +312,7 @@ class QgridWidget(widgets.DOMWidget):
 
         See Also
         --------
-        QgridWidget.on:
+        XellgridWidget.on:
             The method for hooking up instance-level handlers that this
             ``off`` method can remove.
 
@@ -937,15 +930,15 @@ class QgridWidget(widgets.DOMWidget):
         self._update_table(triggered_by='change_filter')
         self._ignore_df_changed = False
 
-    def _handle_qgrid_msg(self, widget, content, buffers=None):
+    def _handle_xellgrid_msg(self, widget, content, buffers=None):
         try:
-            self._handle_qgrid_msg_helper(content)
+            self._handle_xellgrid_msg_helper(content)
         except Exception as e:
             self.log.error(e)
             self.log.exception("Unhandled exception while handling msg")
 
-    def _handle_qgrid_msg_helper(self, content):
-        """Handle incoming messages from the QGridView"""
+    def _handle_xellgrid_msg_helper(self, content):
+        """Handle incoming messages from the XelGridView"""
         if 'type' not in content:
             return
 
@@ -1086,7 +1079,7 @@ class QgridWidget(widgets.DOMWidget):
     def get_changed_df(self):
         """
         Get a copy of the DataFrame that was used to create the current
-        instance of QgridWidget which reflects the current state of the UI.
+        instance of XellgridWidget which reflects the current state of the UI.
         This includes any sorting or filtering changes, as well as edits
         that have been made by double clicking cells.
 
@@ -1133,7 +1126,7 @@ class QgridWidget(widgets.DOMWidget):
 
         See Also
         --------
-        QgridWidget.remove_rows:
+        XellgridWidget.remove_rows:
             The method for removing a row (or rows).
         """
         if row is None:
@@ -1266,9 +1259,9 @@ class QgridWidget(widgets.DOMWidget):
 
         See Also
         --------
-        QgridWidget.add_row:
+        XellgridWidget.add_row:
             The method for adding a row.
-        QgridWidget.remove_row:
+        XellgridWidget.remove_row:
             Alias for this method.
         """
         row_indices = self._remove_rows(rows=rows)
@@ -1370,4 +1363,4 @@ class QgridWidget(widgets.DOMWidget):
 
 
 # Alias for legacy support, since we changed the capitalization
-QGridWidget = QgridWidget
+XellGridWidget = XellgridWidget

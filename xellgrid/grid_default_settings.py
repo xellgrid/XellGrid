@@ -1,5 +1,6 @@
 import pandas as pd
 
+
 class DefaultSettings(object):
 
     def __init__(self):
@@ -73,23 +74,23 @@ def set_defaults(show_toolbar=None,
                  column_options=None):
     """
      Set the default XellGrid options.  The options that you can set here are the
-    same ones that you can pass into ``QgridWidget`` constructor, with the
+    same ones that you can pass into ``XellgridWidget`` constructor, with the
     exception of the ``df`` option, for which a default value wouldn't be
-    particularly useful (since the purpose of qgrid is to display a DataFrame).
+    particularly useful (since the purpose of Xellgrid is to display a DataFrame).
 
-    See the documentation for ``QgridWidget`` for more information.
+    See the documentation for ``XellgridWidget`` for more information.
 
     Notes
     -----
     This function will be useful to you if you find yourself
-    setting the same options every time you create a QgridWidget. Calling
+    setting the same options every time you create a XellgridWidget. Calling
     this ``set_defaults`` function once sets the options for the lifetime of
     the kernel, so you won't have to include the same options every time you
-    instantiate a ``QgridWidget``.
+    instantiate a ``XellgridWidget``.
 
     See Also
     --------
-    QgridWidget :
+    XellgridWidget :
         The widget whose default behavior is changed by ``set_defaults``.
     """
     defaults.set_defaults(show_toolbar=show_toolbar,
