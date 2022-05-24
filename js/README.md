@@ -1,6 +1,6 @@
-# qgrid2
+# xellgrid2
 
-[![Github Actions Status](https://github.com/Quantopian/qgrid.git/workflows/Build/badge.svg)](https://github.com/Quantopian/qgrid.git/actions/workflows/build.yml)
+[![Github Actions Status](https://github.com/Quantopian/xellgrid.git/workflows/Build/badge.svg)](https://github.com/Quantopian/xellgrid.git/actions/workflows/build.yml)
 
 An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook
 
@@ -15,7 +15,7 @@ An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook
 To install the extension, execute:
 
 ```bash
-pip install qgrid2
+pip install xellgrid2
 ```
 
 ## Uninstall
@@ -23,7 +23,7 @@ pip install qgrid2
 To remove the extension, execute:
 
 ```bash
-pip uninstall qgrid2
+pip uninstall xellgrid2
 ```
 
 
@@ -39,7 +39,7 @@ The `jlpm` command is JupyterLab's pinned version of
 
 ```bash
 # Clone the repo to your local environment
-# Change directory to the qgrid2 directory
+# Change directory to the xellgrid2 directory
 # Install package in development mode
 pip install -e .
 # Link your development version of the extension with JupyterLab
@@ -68,12 +68,12 @@ jupyter lab build --minimize=False
 ### Development uninstall
 
 ```bash
-pip uninstall qgrid2
+pip uninstall xellgrid2
 ```
 
 In development mode, you will also need to remove the symlink created by `jupyter labextension develop`
 command. To find its location, you can run `jupyter labextension list` to figure out where the `labextensions`
-folder is located. Then you can remove the symlink named `qgrid2` within that folder.
+folder is located. Then you can remove the symlink named `xellgrid2` within that folder.
 
 ### Packaging the extension
 

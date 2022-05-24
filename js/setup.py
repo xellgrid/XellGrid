@@ -1,5 +1,5 @@
 """
-qgrid2 setup
+xellgrid2 setup
 """
 import json
 import sys
@@ -10,7 +10,7 @@ import setuptools
 HERE = Path(__file__).parent.resolve()
 
 # The name of the project
-name = "qgrid2"
+name = "xellgrid2"
 
 lab_path = (HERE / name.replace("-", "_") / "labextension")
 
@@ -20,7 +20,7 @@ ensured_targets = [
     str(lab_path / "static/style.js")
 ]
 
-labext_name = "qgrid2"
+labext_name = "xellgrid2"
 
 data_files_spec = [
     ("share/jupyter/labextensions/%s" % labext_name, str(lab_path.relative_to(HERE)), "**"),

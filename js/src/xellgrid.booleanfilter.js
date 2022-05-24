@@ -1,12 +1,12 @@
 var $ = require('jquery');
-var filter_base = require('./qgrid.filterbase.js');
+var filter_base = require('./xellgrid.filterbase.js');
 
 export class BooleanFilter extends filter_base.FilterBase {
 
   get_filter_html() {
     return `
-      <div class='boolean-filter grid-filter qgrid-dropdown-menu'>
-        <h3 class='qgrid-popover-title'>
+      <div class='boolean-filter grid-filter xellgrid-dropdown-menu'>
+        <h3 class='xellgrid-popover-title'>
           <div class='dropdown-title'>Filter by ${this.field}</div>
           <i class='fa fa-times icon-remove close-button'/>
         </h3>
