@@ -5,10 +5,10 @@ node_modules/
 *.egg-info/
 .ipynb_checkpoints
 *.tsbuildinfo
-qgrid/qgrid2/labextension
-qgrid/.ipynb_checkpoints
-qgrid/dask-worker-space
-qgrid/static
+xellgrid/qgrid2/labextension
+xellgrid/.ipynb_checkpoints
+xellgrid/dask-worker-space
+xellgrid/static
 
 js/.github
 js/.ipynb_checkpoints

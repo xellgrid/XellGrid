@@ -3,7 +3,7 @@ import pandas as pd
 from IPython.display import display
 from numbers import Integral
 from .grid_default_settings import defaults
-from .grid import QgridWidget
+from .grid import XellgridWidget
 
 
 def _display_as_qgrid(data):
@@ -238,7 +238,7 @@ def show_grid(data_frame,
     column_definitions = (column_definitions or {})
 
     # create a visualization for the dataframe
-    return QgridWidget(df=data_frame, precision=precision,
+    return XellgridWidget(df=data_frame, precision=precision,
                        grid_options=grid_options,
                        column_options=column_options,
                        column_definitions=column_definitions,

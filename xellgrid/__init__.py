@@ -1,13 +1,14 @@
 from ._version import version_info, __version__  # noqa F401
 
 from .grid import (
-    QgridWidget,
-    QGridWidget,
+    XellgridWidget,
+    XellGridWidget
 )
 
 from .grid_default_settings import (
     set_defaults,
     set_grid_option,
+    defaults
 )
 
 from .grid_event_handlers import (
@@ -41,6 +42,7 @@ __all__ = [
     "off",
     "set_grid_option",
     "show_grid",
-    "QgridWidget",
-    "QGridWidget",
+    "XellgridWidget",
+    "XellGridWidget",
+    "defaults"
 ]

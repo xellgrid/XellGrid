@@ -26,16 +26,16 @@ class EventHandlers(object):
             except KeyError:
                 pass
 
-    def notify_listeners(self, event, qgrid_widget):
+    def notify_listeners(self, event, xellgrid_widget):
         event_listeners = self._listeners.get(event['name'], [])
         all_listeners = self._listeners.get(All, [])
         for c in chain(event_listeners, all_listeners):
-            c(event, qgrid_widget)
+            c(event, xellgrid_widget)
 
 
 def on(names, handler):
     """
-    Setup a handler to be called when a user interacts with any qgrid instance.
+    Setup a handler to be called when a user interacts with any xellgrid instance.
 
     Parameters
     ----------
@@ -45,15 +45,15 @@ def on(names, handler):
         str, the handler will apply just the event with that name.
     handler : callable
         A callable that is called when the event occurs. Its
-        signature should be ``handler(event, qgrid_widget)``, where
-        ``event`` is a dictionary and ``qgrid_widget`` is the QgridWidget
+        signature should be ``handler(event, xellgrid_widget)``, where
+        ``event`` is a dictionary and ``xellgrid_widget`` is the XellgridWidget
         instance that fired the event. The ``event`` dictionary at least
         holds a ``name`` key which specifies the name of the event that
         occurred.
 
     Notes
     -----
-    There is also an ``on`` method on each individual QgridWidget instance,
+    There is also an ``on`` method on each individual XellgridWidget instance,
     which works exactly like this one except it only listens for events on an
     individual instance (whereas this module-level method listens for events
     on all instances).
@@ -62,9 +62,9 @@ def on(names, handler):
     that can be listened to via this module-level ``on`` method.  Both
     methods support the same events with one exception: the
     ``instance_create`` event.  This event is only available at the
-    module-level and not on individual QgridWidget instances.
+    module-level and not on individual XellgridWidget instances.
 
-    The reason it's not available on individual qgrid instances is because
+    The reason it's not available on individual xellgrid instances is because
     the only time it fires is when a new instance is created. This means
     it's already done firing by the time a user has a chance to hook up any
     event listeners.
@@ -88,9 +88,9 @@ def on(names, handler):
 
     See Also
     --------
-    QgridWidget.on :
+    XellgridWidget.on :
         Same as this ``on`` method except it listens for events on an
-        individual QgridWidget instance rather than on all instances.  See
+        individual XellgridWidget instance rather than on all instances.  See
         this method for a list of all the types of events that can be
         listened for via either ``on`` method.
     off:
@@ -102,7 +102,7 @@ def on(names, handler):
 
 def off(names, handler):
     """
-    Remove a qgrid event handler that was registered with the ``on`` method.
+    Remove a xellgrid event handler that was registered with the ``on`` method.
 
     Parameters
     ----------
