@@ -22,6 +22,7 @@ from .grid_default_settings import defaults
 from .grid_event_handlers import EventHandlers, handlers
 from .grid_utils import stringify
 
+
 # versions of pandas prior to version 0.20.0 don't support the orient='table'
 # when calling the 'to_json' function on DataFrames.  to get around this we
 # have our own copy of the panda's 0.20.0 implementation that we use for old
@@ -545,6 +546,9 @@ class XellgridWidget(widgets.DOMWidget):
                 if sort_column_name:
                     series_to_set = df[sort_column_name]
                 else:
+                    temp = self._get_col_series_from_df(
+                        col_name, df, level_vals=True
+                    )
                     series_to_set = self._get_col_series_from_df(
                         col_name, df, level_vals=True
                     ).to_timestamp()
@@ -1167,10 +1171,6 @@ class XellgridWidget(widgets.DOMWidget):
 
     def _add_empty_row(self):
         self._df = pd.DataFrame([[np.nan] * len(self._df.columns)], columns=self._df.columns).concat(self._df, ignore_index=True)
-
-        self._update_table(
-            triggered_by="add_row", scroll_to_row=1
-        )
 
     def _add_row(self, row):
         """

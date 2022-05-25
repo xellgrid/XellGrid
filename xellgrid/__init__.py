@@ -2,7 +2,7 @@ from ._version import version_info, __version__  # noqa F401
 
 from .grid import (
     XellgridWidget,
-    XellGridWidget,
+    XellGridWidget
 )
 
 from .grid_default_settings import (

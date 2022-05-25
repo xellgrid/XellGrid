@@ -54,12 +54,14 @@ def init_event_history(event_names, widget=None):
     if widget is not None:
         widget.on(event_names, on_change)
     else:
+
         xellgrid_on(event_names, on_change)
 
     return event_history
 
 
 def test_edit_date():
+
     view = XellgridWidget(df=create_df())
     check_edit_success(
         view,

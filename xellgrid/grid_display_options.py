@@ -6,21 +6,21 @@ from .grid_default_settings import defaults
 from .grid import XellgridWidget
 
 
-def _display_as_xellgrid(data):
+def _display_as_qgrid(data):
     display(show_grid(data))
 
 
 def enable(dataframe=True, series=True):
     """
-    Automatically use xellgrid to display all DataFrames and/or Series
+    Automatically use qgrid to display all DataFrames and/or Series
     instances in the notebook.
 
     Parameters
     ----------
     dataframe : bool
-        Whether to automatically use xellgrid to display DataFrames instances.
+        Whether to automatically use qgrid to display DataFrames instances.
     series : bool
-        Whether to automatically use xellgrid to display Series instances.
+        Whether to automatically use qgrid to display Series instances.
     """
     try:
         from IPython.core.getipython import get_ipython
@@ -31,19 +31,19 @@ def enable(dataframe=True, series=True):
     ip_formatter = ip.display_formatter.ipython_display_formatter
 
     if dataframe:
-        ip_formatter.for_type(pd.DataFrame, _display_as_xellgrid)
+        ip_formatter.for_type(pd.DataFrame, _display_as_qgrid)
     else:
         ip_formatter.type_printers.pop(pd.DataFrame, None)
 
     if series:
-        ip_formatter.for_type(pd.Series, _display_as_xellgrid)
+        ip_formatter.for_type(pd.Series, _display_as_qgrid)
     else:
         ip_formatter.type_printers.pop(pd.Series)
 
 
 def disable():
     """
-    Stop using xellgrid to display DataFrames and Series instances in the
+    Stop using qgrid to display DataFrames and Series instances in the
     notebook.  This has the same effect as calling ``enable`` with both
     kwargs set to ``False`` (and in fact, that's what this function does
     internally).
@@ -62,23 +62,23 @@ def show_grid(data_frame,
 
     """
     Renders a DataFrame or Series as an interactive XellGrid, represented by
-    an instance of the ``XellgridWidget`` class.  The ``XellgridWidget`` instance
+    an instance of the ``QgridWidget`` class.  The ``QgridWidget`` instance
     is constructed using the options passed in to this function.  The
     ``data_frame`` argument to this function is used as the ``df`` kwarg in
-    call to the XellgridWidget constructor, and the rest of the parameters
+    call to the QgridWidget constructor, and the rest of the parameters
     are passed through as is.
 
     If the ``data_frame`` argument is a Series, it will be converted to a
-    DataFrame before being passed in to the XellgridWidget constructor as the
+    DataFrame before being passed in to the QgridWidget constructor as the
     ``df`` kwarg.
 
-    :rtype: XellgridWidget
+    :rtype: QgridWidget
 
     Parameters
     ----------
     data_frame : DataFrame
         The DataFrame that will be displayed by this instance of
-        XellgridWidget.
+        QgridWidget.
     grid_options : dict
         Options to use when creating the SlickGrid control (i.e. the
         interactive grid).  See the Notes section below for more information
@@ -131,7 +131,7 @@ def show_grid(data_frame,
             'autoEdit': False,
             'explicitInitialization': True,
 
-            # Xellgrid options
+            # Qgrid options
             'maxVisibleRows': 15,
             'minVisibleRows': 8,
             'sortable': True,
@@ -145,15 +145,15 @@ def show_grid(data_frame,
     <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_.
 
     The second group of option are options that were added specifically
-    for Xellgrid and therefore are not documented in the SlickGrid documentation.
+    for Qgrid and therefore are not documented in the SlickGrid documentation.
     The following bullet points describe these options.
 
-    * **maxVisibleRows** The maximum number of rows that Xellgrid will show.
-    * **minVisibleRows** The minimum number of rows that Xellgrid will show
-    * **sortable** Whether the Xellgrid instance will allow the user to sort
+    * **maxVisibleRows** The maximum number of rows that Qgrid will show.
+    * **minVisibleRows** The minimum number of rows that Qgrid will show
+    * **sortable** Whether the Qgrid instance will allow the user to sort
       columns by clicking the column headers. When this is set to ``False``,
       nothing will happen when users click the column headers.
-    * **filterable** Whether the Xellgrid instance will allow the user to filter
+    * **filterable** Whether the Qgrid instance will allow the user to filter
       the grid. When this is set to ``False`` the filter icons won't be shown
       for any columns.
     * **highlightSelectedCell** If you set this to True, the selected cell
@@ -174,7 +174,7 @@ def show_grid(data_frame,
             'toolTip': "",
             'width': None
 
-            # Xellgrid column options
+            # Qgrid column options
             'editable': True,
         }
 
@@ -182,7 +182,7 @@ def show_grid(data_frame,
     described in the `SlickGrid documentation
     <https://github.com/mleibman/SlickGrid/wiki/Column-Options>`_.
 
-    The ``editable`` option was added specifically for Xellgrid and therefore is
+    The ``editable`` option was added specifically for Qgrid and therefore is
     not documented in the SlickGrid documentation.  This option specifies
     whether a column should be editable or not.
 
@@ -193,12 +193,12 @@ def show_grid(data_frame,
                    and ``column_definitions`` parameters, since those
                    depend on the particular set of data being shown by an
                    instance, and therefore aren't parameters we would want
-                   to set for all XellgridWidet instances.
+                   to set for all QgridWidet instances.
     set_grid_option : Permanently set global defaults for individual
                       grid options.  Does so by changing the defaults
                       that the ``show_grid`` method uses for the
                       ``grid_options`` parameter.
-    XellgridWidget : The widget class that is instantiated and returned by this
+    QgridWidget : The widget class that is instantiated and returned by this
                   method.
 
     """
