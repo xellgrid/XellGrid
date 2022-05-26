@@ -1,4 +1,4 @@
-# Making a new release of qgrid2
+# Making a new release of xellgrid2
 
 The extension can be published to `PyPI` and `npm` manually or using the [Jupyter Releaser](https://github.com/jupyter-server/jupyter_releaser).
 

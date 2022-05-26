@@ -3,8 +3,8 @@ requires = ["jupyter_packaging~=0.10,<2", "jupyterlab>=3.1"]
 build-backend = "jupyter_packaging.build_api"
 
 [tool.jupyter-packaging.options]
-skip-if-exists = ["qgrid2/labextension/static/style.js"]
-ensured-targets = ["qgrid2/labextension/static/style.js", "qgrid2/labextension/package.json"]
+skip-if-exists = ["xellgrid2/labextension/static/style.js"]
+ensured-targets = ["xellgrid2/labextension/static/style.js", "xellgrid2/labextension/package.json"]
 
 [tool.jupyter-packaging.builder]
 factory = "jupyter_packaging.npm_builder"
@@ -14,4 +14,4 @@ build_cmd = "build:prod"
 npm = ["jlpm"]
 
 [tool.check-manifest]
-ignore = ["qgrid2/labextension/**", "yarn.lock", ".*", "package-lock.json"]
+ignore = ["xellgrid2/labextension/**", "yarn.lock", ".*", "package-lock.json"]
