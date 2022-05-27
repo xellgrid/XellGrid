@@ -1,11 +1,11 @@
 var $ = require('jquery');
 
 export class FilterBase {
-  constructor(field, column_type, qgrid) {
+  constructor(field, column_type, xellgrid) {
     this.field = field;
     this.column_type = column_type;
-    this.qgrid = qgrid;
-    this.widget_model = qgrid.model;
+    this.xellgrid = xellgrid;
+    this.widget_model = xellgrid.model;
     if (this.widget_model) {
       this.precision = this.widget_model.get('precision');
     }
@@ -15,7 +15,7 @@ export class FilterBase {
   handle_msg(msg) {
     var column_info = msg.col_info;
     if (msg.type == 'column_min_max_updated'){
-      this.update_min_max(column_info, this.qgrid.has_active_filter());
+      this.update_min_max(column_info, this.xellgrid.has_active_filter());
     }
   }
 

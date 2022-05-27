@@ -5,6 +5,6 @@
 // already be loaded by the notebook otherwise.
 
 // Export widget models and views, and the npm package version number.
-import widget = require('./qgrid.widget');
+import widget = require('./xellgrid.widget');
 export = widget;
 // module.exports.version = require('../package.json').version;

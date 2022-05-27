@@ -5,7 +5,7 @@ node_modules/
 *.egg-info/
 .ipynb_checkpoints
 *.tsbuildinfo
-xellgrid/qgrid2/labextension
+xellgrid/xellgrid/labextension
 xellgrid/.ipynb_checkpoints
 xellgrid/dask-worker-space
 xellgrid/static
@@ -17,8 +17,8 @@ js/dask-worker-space
 js/dist
 js/lib
 js/node_modules
-js/qgrid2.egg-info
-js/qgrid2/labextension
+js/xellgrid.egg-info
+js/xellgrid2/labextension
 
 # Created by https://www.gitignore.io/api/python
 # Edit at https://www.gitignore.io/?templates=python

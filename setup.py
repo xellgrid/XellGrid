@@ -69,8 +69,8 @@ class NPM(Command):
     node_modules = join(node_root, 'node_modules')
 
     targets = [
-        join(here, 'qgrid', 'static', 'extension.js'),
-        join(here, 'qgrid', 'static', 'index.js')
+        # join(here, 'xellgrid', 'static', 'extension.js'),
+        # join(here, 'xellgrid', 'static', 'index.js')
     ]
 
     def initialize_options(self):
@@ -115,7 +115,7 @@ class NPM(Command):
         update_package_data(self.distribution)
 
 version_ns = {}
-with open(join(here, 'qgrid', '_version.py')) as f:
+with open(join(here, 'xellgrid', '_version.py')) as f:
     exec(f.read(), {}, version_ns)
 
 def read_requirements(basename):
@@ -132,7 +132,7 @@ def package_files(directory):
             paths.append(os.path.join(path, filename))
     return paths
 
-data_files = package_files('qgrid/static')
+data_files = package_files('xellgrid/static')
 
 
 def extras_require():
@@ -144,13 +144,13 @@ def extras_require():
     }
 
 setup_args = {
-    'name': 'qgrid',
+    'name': 'xellgrid',
     'version': version_ns['__version__'],
     'description': 'An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook',
     'long_description': LONG_DESCRIPTION,
     'include_package_data': True,
     'data_files': [
-        ('share/jupyter/nbextensions/qgrid', data_files),
+        ('share/jupyter/nbextensions/xellgrid', data_files),
     ],
     'install_requires': reqs,
     'extras_require': extras_require(),
@@ -165,7 +165,7 @@ setup_args = {
 
     'author': 'Quantopian Inc.',
     'author_email': 'opensource@quantopian.com',
-    'url': 'https://github.com/quantopian/qgrid',
+    'url': 'https://github.com/xellgrid/XellGrid',
     'license': 'Apache-2.0',
     'keywords': [
         'ipython',
