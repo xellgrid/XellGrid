@@ -32,6 +32,10 @@ class EventHandlers(object):
         for c in chain(event_listeners, all_listeners):
             c(event, xellgrid_widget)
 
+    @property
+    def listeners(self):
+        return self._listeners
+
 
 def on(names, handler):
     """
@@ -120,5 +124,5 @@ def off(names, handler):
     """
     handlers.off(names, handler)
 
-
 handlers = EventHandlers()
+

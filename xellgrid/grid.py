@@ -361,11 +361,8 @@ class XellgridWidget(widgets.DOMWidget):
             return
         self.send({'type': 'change_show_toolbar'})
 
-    def _update_table(self,
-        update_columns=False,
-        triggered_by=None,
-        scroll_to_row=None,
-        fire_data_change_event=True):
+    def _update_table(self, update_columns=False, triggered_by=None, scroll_to_row=None, fire_data_change_event=True):
+
         df = self._df.copy()
 
         from_index = max(self._viewport_range[0] - PAGE_SIZE, 0)
