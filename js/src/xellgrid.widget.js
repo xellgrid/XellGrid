@@ -201,11 +201,11 @@ var MainMenu = function () {
 
 
 // Model for the xellgrid widget
-class QgridModel extends widgets.DOMWidgetModel {
+class XellgridModel extends widgets.DOMWidgetModel {
   defaults() {
     return _.extend(widgets.DOMWidgetModel.prototype.defaults(), {
-      _model_name : 'QgridModel',
-      _view_name : 'QgridView',
+      _model_name : 'XellgridModel',
+      _view_name : 'XellgridView',
       _model_module : 'xellgrid',
       _view_module : 'xellgrid',
       _model_module_version : '^1.1.3',
@@ -218,7 +218,7 @@ class QgridModel extends widgets.DOMWidgetModel {
 
 
 // View for the xellgrid widget
-class QgridView extends widgets.DOMWidgetView {
+class XellgridView extends widgets.DOMWidgetView {
   render() {
     // subscribe to incoming messages from the QGridWidget
     this.model.on('msg:custom', this.handle_msg, this);
@@ -1060,6 +1060,6 @@ class QgridView extends widgets.DOMWidgetView {
 }
 
 module.exports = {
-  QgridModel : QgridModel,
-  QgridView : QgridView
+  XellgridModel : XellgridModel,
+  XellgridView : XellgridView
 };
