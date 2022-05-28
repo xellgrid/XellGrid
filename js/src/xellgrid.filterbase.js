@@ -115,7 +115,7 @@ export class FilterBase {
       this.create_error_msg();
     }
 
-    this.filter_elem.appendTo(this.column_header_elem.closest(".q-grid-container")).show();
+    this.filter_elem.appendTo(this.column_header_elem.closest(".xell-grid-container")).show();
 
     // position the dropdown
     var top = this.filter_btn.offset().top + this.filter_btn.height();
@@ -125,7 +125,7 @@ export class FilterBase {
     this.filter_elem.width(filter_width);
     var elem_right = left + filter_width;
 
-    var qgrid_area = this.filter_elem.closest('.q-grid-container');
+    var qgrid_area = this.filter_elem.closest('.xell-grid-container');
     if (elem_right > qgrid_area.offset().left + qgrid_area.width()) {
       left = (this.filter_btn.offset().left + this.filter_btn.width()) - filter_width;
     }
