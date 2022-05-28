@@ -231,8 +231,8 @@ class QgridView extends widgets.DOMWidgetView {
    */
   initialize_qgrid() {
     this.$el.empty();
-    if (!this.$el.hasClass('q-grid-container')){
-      this.$el.addClass('q-grid-container');
+    if (!this.$el.hasClass('xell-grid-container')){
+      this.$el.addClass('xell-grid-container');
     }
     this.initialize_toolbar();
     this.initialize_slick_grid();
@@ -249,7 +249,7 @@ class QgridView extends widgets.DOMWidgetView {
       return;
     }
 
-    this.toolbar = $("<div class='q-grid-toolbar'>").appendTo(this.$el);
+    this.toolbar = $("<div class='xell-grid-toolbar'>").appendTo(this.$el);
 
     this.window_dropdown_menu = $(`
     <div id="menu-bar" > 
@@ -358,7 +358,7 @@ class QgridView extends widgets.DOMWidgetView {
   initialize_slick_grid() {
 
     if (!this.grid_elem) {
-      this.grid_elem = $("<div class='q-grid'>").appendTo(this.$el);
+      this.grid_elem = $("<div class='xell-grid'>").appendTo(this.$el);
     }
 
     // create the table
