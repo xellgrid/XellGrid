@@ -2,25 +2,24 @@ import pandas as pd
 
 from IPython.display import display
 from numbers import Integral
-from .grid_default_settings import defaults
-from .grid import XellgridWidget
+from xellgrid import defaults, XellgridWidget
 
 
-def _display_as_qgrid(data):
+def _display_as_xellgrid(data):
     display(show_grid(data))
 
 
 def enable(dataframe=True, series=True):
     """
-    Automatically use qgrid to display all DataFrames and/or Series
+    Automatically use Xellgrid to display all DataFrames and/or Series
     instances in the notebook.
 
     Parameters
     ----------
     dataframe : bool
-        Whether to automatically use qgrid to display DataFrames instances.
+        Whether to automatically use Xellgrid to display DataFrames instances.
     series : bool
-        Whether to automatically use qgrid to display Series instances.
+        Whether to automatically use Xellgrid to display Series instances.
     """
     try:
         from IPython.core.getipython import get_ipython
@@ -31,19 +30,19 @@ def enable(dataframe=True, series=True):
     ip_formatter = ip.display_formatter.ipython_display_formatter
 
     if dataframe:
-        ip_formatter.for_type(pd.DataFrame, _display_as_qgrid)
+        ip_formatter.for_type(pd.DataFrame, _display_as_xellgrid)
     else:
         ip_formatter.type_printers.pop(pd.DataFrame, None)
 
     if series:
-        ip_formatter.for_type(pd.Series, _display_as_qgrid)
+        ip_formatter.for_type(pd.Series, _display_as_xellgrid)
     else:
-        ip_formatter.type_printers.pop(pd.Series)
+        ip_formatter.type_printers.pop(pd.Series, None)
 
 
 def disable():
     """
-    Stop using qgrid to display DataFrames and Series instances in the
+    Stop using xellgrid to display DataFrames and Series instances in the
     notebook.  This has the same effect as calling ``enable`` with both
     kwargs set to ``False`` (and in fact, that's what this function does
     internally).
@@ -62,23 +61,23 @@ def show_grid(data_frame,
 
     """
     Renders a DataFrame or Series as an interactive XellGrid, represented by
-    an instance of the ``QgridWidget`` class.  The ``QgridWidget`` instance
+    an instance of the ``XellgridWidget`` class.  The ``XellgridWidget`` instance
     is constructed using the options passed in to this function.  The
     ``data_frame`` argument to this function is used as the ``df`` kwarg in
-    call to the QgridWidget constructor, and the rest of the parameters
+    call to the XellgridWidget constructor, and the rest of the parameters
     are passed through as is.
 
     If the ``data_frame`` argument is a Series, it will be converted to a
-    DataFrame before being passed in to the QgridWidget constructor as the
+    DataFrame before being passed in to the XellgridWidget constructor as the
     ``df`` kwarg.
 
-    :rtype: QgridWidget
+    :rtype: XellgridWidget
 
     Parameters
     ----------
     data_frame : DataFrame
         The DataFrame that will be displayed by this instance of
-        QgridWidget.
+        XellgridWidget.
     grid_options : dict
         Options to use when creating the SlickGrid control (i.e. the
         interactive grid).  See the Notes section below for more information
@@ -131,7 +130,7 @@ def show_grid(data_frame,
             'autoEdit': False,
             'explicitInitialization': True,
 
-            # Qgrid options
+            # Xellgrid options
             'maxVisibleRows': 15,
             'minVisibleRows': 8,
             'sortable': True,
@@ -145,15 +144,15 @@ def show_grid(data_frame,
     <https://github.com/mleibman/SlickGrid/wiki/Grid-Options>`_.
 
     The second group of option are options that were added specifically
-    for Qgrid and therefore are not documented in the SlickGrid documentation.
+    for Xellgrid and therefore are not documented in the SlickGrid documentation.
     The following bullet points describe these options.
 
-    * **maxVisibleRows** The maximum number of rows that Qgrid will show.
-    * **minVisibleRows** The minimum number of rows that Qgrid will show
-    * **sortable** Whether the Qgrid instance will allow the user to sort
+    * **maxVisibleRows** The maximum number of rows that Xellgrid will show.
+    * **minVisibleRows** The minimum number of rows that Xellgrid will show
+    * **sortable** Whether the Xellgrid instance will allow the user to sort
       columns by clicking the column headers. When this is set to ``False``,
       nothing will happen when users click the column headers.
-    * **filterable** Whether the Qgrid instance will allow the user to filter
+    * **filterable** Whether the Xellgrid instance will allow the user to filter
       the grid. When this is set to ``False`` the filter icons won't be shown
       for any columns.
     * **highlightSelectedCell** If you set this to True, the selected cell
@@ -174,7 +173,7 @@ def show_grid(data_frame,
             'toolTip': "",
             'width': None
 
-            # Qgrid column options
+            # Xellgrid column options
             'editable': True,
         }
 
@@ -182,7 +181,7 @@ def show_grid(data_frame,
     described in the `SlickGrid documentation
     <https://github.com/mleibman/SlickGrid/wiki/Column-Options>`_.
 
-    The ``editable`` option was added specifically for Qgrid and therefore is
+    The ``editable`` option was added specifically for Xellgrid and therefore is
     not documented in the SlickGrid documentation.  This option specifies
     whether a column should be editable or not.
 
@@ -193,12 +192,12 @@ def show_grid(data_frame,
                    and ``column_definitions`` parameters, since those
                    depend on the particular set of data being shown by an
                    instance, and therefore aren't parameters we would want
-                   to set for all QgridWidet instances.
+                   to set for all XellgridWidet instances.
     set_grid_option : Permanently set global defaults for individual
                       grid options.  Does so by changing the defaults
                       that the ``show_grid`` method uses for the
                       ``grid_options`` parameter.
-    QgridWidget : The widget class that is instantiated and returned by this
+    XellgridWidget : The widget class that is instantiated and returned by this
                   method.
 
     """
@@ -218,14 +217,14 @@ def show_grid(data_frame,
         column_options = options
     if grid_options is None:
         grid_options = grid_defaults.grid_options
+    elif not isinstance(grid_options, dict):
+        raise TypeError(
+            "grid_options must be dict, not %s" % type(grid_options)
+        )
     else:
         options = grid_defaults.grid_options.copy()
         options.update(grid_options)
         grid_options = options
-    if not isinstance(grid_options, dict):
-        raise TypeError(
-            "grid_options must be dict, not %s" % type(grid_options)
-        )
 
     # if a Series is passed in, convert it to a DataFrame
     if isinstance(data_frame, pd.Series):
@@ -239,8 +238,8 @@ def show_grid(data_frame,
 
     # create a visualization for the dataframe
     return XellgridWidget(df=data_frame, precision=precision,
-                       grid_options=grid_options,
-                       column_options=column_options,
-                       column_definitions=column_definitions,
-                       row_edit_callback=row_edit_callback,
-                       show_toolbar=show_toolbar)
+                          grid_options=grid_options,
+                          column_options=column_options,
+                          column_definitions=column_definitions,
+                          row_edit_callback=row_edit_callback,
+                          show_toolbar=show_toolbar)

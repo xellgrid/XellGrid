@@ -13,7 +13,9 @@ from .grid_default_settings import (
 
 from .grid_event_handlers import (
     on,
-    off
+    off,
+    EventHandlers,
+    handlers
 )
 
 from .grid_display_options import (
@@ -44,5 +46,7 @@ __all__ = [
     "show_grid",
     "XellgridWidget",
     "XellGridWidget",
-    "defaults"
+    "defaults",
+    "EventHandlers",
+    "handlers"
 ]
