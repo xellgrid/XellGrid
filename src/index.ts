@@ -5,7 +5,7 @@ import {
 import * as xellgrid from './xellgrid.widget';
 import * as base from '@jupyter-widgets/base';
 /**
- * Initialization data for the xellgrid2 extension.
+ * Initialization data for the xellgrid extension.
  */
 const extension: JupyterFrontEndPlugin<void> = {
   id: 'xellgrid',
@@ -17,7 +17,7 @@ const extension: JupyterFrontEndPlugin<void> = {
         version: '1.1.3', // todo: read from package.json
         exports: xellgrid
     });
-    console.log('JupyterLab extension xellgrid2 is activated!');
+    console.log('JupyterLab extension xellgrid is activated!');
   }
 };
 

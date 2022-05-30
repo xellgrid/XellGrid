@@ -1,4 +1,7 @@
-from ._version import version_info, __version__  # noqa F401
+from ._version import __version__  # noqa F401
+
+import json
+from pathlib import Path
 
 from .grid import (
     XellgridWidget,
@@ -35,6 +38,16 @@ def _jupyter_nbextension_paths():
         }
     ]
 
+HERE = Path(__file__).parent.resolve()
+
+with (HERE / "labextension" / "package.json").open() as fid:
+    data = json.load(fid)
+
+def _jupyter_labextension_paths():
+    return [{
+        "src": "labextension",
+        "dest": data["name"]
+    }]
 
 __all__ = [
     "enable",

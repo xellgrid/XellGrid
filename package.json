@@ -1,5 +1,5 @@
 {
-  "name": "xellgrid2",
+  "name": "xellgrid",
   "version": "1.1.3",
   "description": "An Interactive Grid for Sorting and Filtering DataFrames in Jupyter Notebook",
   "author": {
@@ -26,21 +26,20 @@
     "webpack": "webpack build",
     "build:labextension": "jupyter labextension build .",
     "build:labextension:dev": "jupyter labextension build --development True .",
-    "build:lib": "tsc",
     "build:prod": "jlpm run clean && jlpm run build:lib && jlpm run build:labextension",
     "clean": "jlpm run clean:lib",
-    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension",
-    "clean:labextension": "rimraf xellgrid2/labextension",
+    "clean:all": "jlpm run clean:lib && jlpm run clean:labextension && jlpm run clean:dist",
+    "clean:dist": "rimraf dist",
+    "clean:labextension": "rimraf xellgrid/labextension",
     "clean:lib": "rimraf lib tsconfig.tsbuildinfo",
     "eslint": "eslint . --ext .ts,.tsx --fix",
     "eslint:check": "eslint . --ext .ts,.tsx",
     "install:extension": "jlpm run build",
     "prepare": "webpack",
     "test": "echo \"Error: no test specified\" && exit 1",
-    "watch": "run-p watch:src watch:labextension",
+    "watch": "run-p watch_wp watch:labextension",
     "watch_wp": "webpack --watch",
-    "watch:labextension": "jupyter labextension watch .",
-    "watch:src": "tsc -w"
+    "watch:labextension": "jupyter labextension watch ."
   },
   "devDependencies": {
     "@jupyterlab/builder": "^3.1.0",
@@ -93,7 +92,7 @@
   ],
   "jupyterlab": {
     "extension": true,
-    "outputDir": "xellgrid2/labextension"
+    "outputDir": "xellgrid/labextension"
   },
   "styleModule": "style/index.js"
 }

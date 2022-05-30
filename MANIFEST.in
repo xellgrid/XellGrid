@@ -1,5 +1,31 @@
+# old MANIFEST
 include README.rst
-include LICENSE
 include requirements*.txt
+recursive-include xellgrid/labextension *.*
 
-recursive-include qgrid/static *.*
+# new MANIFEST
+include LICENSE
+include *.md
+include pyproject.toml
+
+include package.json
+include install.json
+include ts*.json
+include yarn.lock
+
+graft xellgrid/labextension
+
+# Javascript files
+graft src
+graft style
+prune **/node_modules
+prune lib
+prune binder
+
+# Patterns to exclude from any directory
+global-exclude *~
+global-exclude *.pyc
+global-exclude *.pyo
+global-exclude .git
+global-exclude .ipynb_checkpoints
+
