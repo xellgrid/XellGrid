@@ -6,7 +6,9 @@ import sys
 from pathlib import Path
 
 import setuptools
-
+from os.path import (
+    join, dirname, abspath
+)
 HERE = Path(__file__).parent.resolve()
 
 # The name of the project
@@ -24,7 +26,7 @@ labext_name = "xellgrid"
 
 data_files_spec = [
     ("share/jupyter/labextensions/%s" % labext_name, str(lab_path.relative_to(HERE)), "**"),
-    ("share/jupyter/labextensions/%s" % labext_name, str("."), "install.json"),
+    ("share/jupyter/labextensions/%s" % labext_name, str("."), "install.json")
 ]
 
 long_description = (HERE / "README.md").read_text()
@@ -38,6 +40,11 @@ version = (
     .replace("-rc.", "rc")
 ) 
 
+def read_requirements(basename):
+    reqs_file = join(dirname(abspath(__file__)), basename)
+    with open(reqs_file) as f:
+        return [req.strip() for req in f.readlines()]
+
 setup_args = dict(
     name=name,
     version=version,
@@ -50,7 +57,7 @@ setup_args = dict(
     long_description=long_description,
     long_description_content_type="text/markdown",
     packages=setuptools.find_packages(),
-    install_requires=[],
+    install_requires=read_requirements('requirements.txt'),
     zip_safe=False,
     include_package_data=True,
     python_requires=">=3.6",

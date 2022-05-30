@@ -1,7 +1,7 @@
 # old MANIFEST
 include README.rst
 include requirements*.txt
-recursive-include qgrid/static *.*
+recursive-include xellgrid/labextension *.*
 
 # new MANIFEST
 include LICENSE
