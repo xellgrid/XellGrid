@@ -767,7 +767,7 @@ export class XellgridView extends widgets.DOMWidgetView {
       ]
     };
 
-    let contextMenuPlugin = new Slick.Plugins.ContextMenu(contextMenuOptions);
+    let contextMenuPlugin = new (Slick as any).Plugins.ContextMenu(contextMenuOptions);
     this.slick_grid.registerPlugin(contextMenuPlugin);
     contextMenuPlugin.onBeforeMenuShow.subscribe((e: any, args: any) =>{
       // for example, you could select the row it was clicked with
