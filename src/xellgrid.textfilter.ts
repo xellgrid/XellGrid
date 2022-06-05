@@ -147,15 +147,6 @@ export class TextFilter extends filter_base.FilterBase {
       return x_value > y_value ? 1 : -1;
     };
 
-    // var text_filter = (item: any, args: any) => {
-    //   if (this.search_string) {
-    //     if (item.value.toLowerCase().indexOf(this.search_string.toLowerCase()) == -1) {
-    //       return false;
-    //     }
-    //   }
-    //   return true;
-    // };
-
     var row_formatter = function (row: any, cell: any, value: any, columnDef: any, dataContext: any) {
       return "<span class='text-filter-value'>" + dataContext.value + "</span>";
     };
