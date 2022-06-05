@@ -1,29 +1,12 @@
 import widgets = require('@jupyter-widgets/base');
 import _ = require('underscore');
 import moment = require('moment');
-declare global {
-  interface Window {
-    $: any,
-    jQuery: any,
-    slick_grid: any
-  }
-}
 import $ = require("jquery");
-// import jQuery = require("jquery");
-// window.$ = window.jQuery = require('jquery');
 import date_filter = require('./xellgrid.datefilter');
 import slider_filter = require('./xellgrid.sliderfilter');
 import text_filter = require('./xellgrid.textfilter');
 import boolean_filter = require('./xellgrid.booleanfilter');
 import editors = require('./xellgrid.editors');
-// var dialog = null;
-
-//try {
-//  dialog = require('base/js/dialog');
-//} catch (e) {
-//  console.warn("Qgrid was unable to load base/js/dialog. " +
-//               "Full screen button won't be available");
-//}
 
 import 'jqueryui';
 
@@ -41,6 +24,13 @@ import 'style-loader!jquery-ui-dist/jquery-ui.min.css'
 import './xellgrid.css'
 import './menu.css'
 
+declare global {
+  interface Window {
+    $: any,
+    jQuery: any,
+    slick_grid: any
+  }
+}
 class MainMenu {
   public activated: boolean;
   public settings: any;
