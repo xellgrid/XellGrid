@@ -22,7 +22,6 @@ from .grid_default_settings import defaults
 from .grid_event_handlers import EventHandlers, handlers
 from .grid_utils import stringify
 
-
 # versions of pandas prior to version 0.20.0 don't support the orient='table'
 # when calling the 'to_json' function on DataFrames.  to get around this we
 # have our own copy of the panda's 0.20.0 implementation that we use for old
@@ -362,7 +361,6 @@ class XellgridWidget(widgets.DOMWidget):
         self.send({'type': 'change_show_toolbar'})
 
     def _update_table(self, update_columns=False, triggered_by=None, scroll_to_row=None, fire_data_change_event=True):
-
         df = self._df.copy()
 
         from_index = max(self._viewport_range[0] - PAGE_SIZE, 0)
@@ -426,8 +424,7 @@ class XellgridWidget(widgets.DOMWidget):
                 ).map(stringify)
             self._set_col_series_on_df(col_name, df, series_to_set)
 
-        if type(df.index) == pd.MultiIndex and \
-                not self._disable_grouping:
+        if type(df.index) == pd.MultiIndex and not self._disable_grouping:
             previous_value = None
             row_styles = {}
             row_loc = from_index
@@ -473,8 +470,8 @@ class XellgridWidget(widgets.DOMWidget):
         with warnings.catch_warnings():
             warnings.simplefilter("ignore", category=UserWarning)
             df_json = df.to_json(
-               None, orient="table", date_format="iso", double_precision=self.precision
-        )
+                None, orient="table", date_format="iso", double_precision=self.precision
+            )
 
         if update_columns:
             self._interval_columns = []
@@ -507,7 +504,7 @@ class XellgridWidget(widgets.DOMWidget):
                     if level == 0:
                         cur_column['first_index'] = True
                     if self._multi_index and \
-                       level == (len(self._primary_key) - 1):
+                            level == (len(self._primary_key) - 1):
                         cur_column['last_index'] = True
 
                 cur_column['position'] = i
@@ -741,12 +738,13 @@ class XellgridWidget(widgets.DOMWidget):
             # filter_info attribute), show the selected rows at the top and
             # specify that they should be checked
             if 'filter_info' in col_info and \
-               'selected' in col_info['filter_info']:
+                    'selected' in col_info['filter_info']:
                 col_filter_info = col_info['filter_info']
                 col_filter_table = self._filter_tables[col_name]
 
                 def get_value_from_filter_table(k):
                     return col_filter_table[k]
+
                 selected_indices = col_filter_info['selected'] or []
                 if selected_indices == 'all':
                     excluded_indices = col_filter_info['excluded'] or []
@@ -754,7 +752,7 @@ class XellgridWidget(widgets.DOMWidget):
                                                excluded_indices))
                     non_excluded_count = 0
                     for i in range(len(unique_list), 0, -1):
-                        unique_val = unique_list[i-1]
+                        unique_val = unique_list[i - 1]
                         if unique_val not in excluded_values:
                             non_excluded_count += 1
                             excluded_values.insert(0, unique_val)
@@ -883,6 +881,7 @@ class XellgridWidget(widgets.DOMWidget):
 
             def get_value_from_filter_table(i):
                 return col_filter_table[i]
+
             if selected_indices == "all":
                 if excluded_indices is not None and len(excluded_indices) > 0:
                     excluded_values = list(
@@ -960,7 +959,7 @@ class XellgridWidget(widgets.DOMWidget):
                 self._df.loc[location] = val_to_set
 
                 query = self._unfiltered_df[self._index_col_name] == \
-                    content['unfiltered_index']
+                        content['unfiltered_index']
                 self._unfiltered_df.loc[query, content['column']] = val_to_set
                 self._notify_listeners({
                     'name': 'cell_edited',
@@ -1167,7 +1166,8 @@ class XellgridWidget(widgets.DOMWidget):
         return last.name
 
     def _add_empty_row(self):
-        self._df = pd.DataFrame([[np.nan] * len(self._df.columns)], columns=self._df.columns).concat(self._df, ignore_index=True)
+        self._df = pd.DataFrame([[np.nan] * len(self._df.columns)], columns=self._df.columns).concat(self._df,
+                                                                                                     ignore_index=True)
 
     def _add_row(self, row):
         """
@@ -1184,10 +1184,9 @@ class XellgridWidget(widgets.DOMWidget):
 
         # check that the given column names match what
         # already exists in the dataframe
-        required_cols = set(df.columns.values).union({df.index.name}) - \
-            {self._index_col_name}
+        required_cols = set(df.columns.values).union({df.index.name}) - {self._index_col_name}
         if set(col_names) != required_cols:
-            msg = "Cannot add row -- column names don't match in "\
+            msg = "Cannot add row -- column names don't match in " \
                   "the existing dataframe"
             self.send({
                 'type': 'show_error',
