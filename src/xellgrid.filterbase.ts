@@ -1,4 +1,4 @@
-import $ = require('jquery');
+import $ from 'jquery';
 
 export class FilterBase {
 	public field: any;

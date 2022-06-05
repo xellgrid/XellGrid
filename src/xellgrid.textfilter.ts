@@ -1,7 +1,6 @@
 // import $ = require('jquery');
-import _ = require('underscore');
+import _ from 'underscore';
 import filter_base = require('./xellgrid.filterbase');
-declare var Slick: any;
 export class TextFilter extends filter_base.FilterBase {
 	public field: any;
 	public values: any;

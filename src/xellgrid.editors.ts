@@ -4,7 +4,7 @@
  * Adapted from https://github.com/mleibman/SlickGrid/blob/master/slick.editors.js
  * MIT License, Copyright (c) 2010 Michael Leibman
  */
-import $ = require('jquery');
+import $ from 'jquery';
 import 'slickgrid/slick.editors';
 
 export class IndexEditor {

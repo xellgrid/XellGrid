@@ -1,4 +1,4 @@
-import $ = require('jquery');
+import $ from 'jquery';
 import filter_base = require('./xellgrid.filterbase');
 
 export class BooleanFilter extends filter_base.FilterBase {
