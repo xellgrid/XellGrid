@@ -1,7 +1,22 @@
-var $ = require('jquery');
-var filter_base = require('./xellgrid.filterbase.js');
+import $ = require('jquery');
+import filter_base = require('./xellgrid.filterbase');
+import 'jqueryui';
 
 export class DateFilter extends filter_base.FilterBase {
+	public field: any;
+	public min_value: any;
+	public max_value: any;
+	public filter_start_date: any;
+	public filter_end_date: any;
+	public has_multiple_values: any;
+	public show_filter: any;
+	public update_filter_button_disabled: any;
+	public start_date_control: any;
+	public min_date: any;
+	public end_date_control: any;
+	public max_date: any;
+	public send_filter_changed: any;
+	public filter_elem: any;
 
   get_filter_html() {
     return `
@@ -22,7 +37,7 @@ export class DateFilter extends filter_base.FilterBase {
     `;
   }
 
-  update_min_max(col_info, has_active_filter) {
+  update_min_max(col_info:any, has_active_filter:any) {
     this.min_value = col_info.filter_min;
     this.max_value = col_info.filter_max;
 
@@ -68,16 +83,16 @@ export class DateFilter extends filter_base.FilterBase {
       "nextText": "",
       minDate: this.min_date,
       maxDate: this.max_date,
-      beforeShow: (input, inst) => {
+      beforeShow: (input:any, inst:any) => {
         // align the datepicker with the right edge of the input it drops down from
         var clicked_elem = $(inst);
         clicked_elem.closest(".xellgrid-dropdown-menu").addClass("calendar-open");
 
         var widget = clicked_elem.datepicker('widget');
-        widget.css('margin-left', $(input).outerWidth() - widget.outerWidth());
+        widget.css('margin-left', $(input).outerWidth()! - widget.outerWidth()!);
         widget.addClass("stay-open-on-click filter-child-elem");
       },
-      onSelect: (dateText, instance) => {
+      onSelect: (dateText:any, instance:any) => {
         // pull the values from the datepickers
         var start_date_string = this.start_date_control.val();
         var end_date_string = this.end_date_control.val();
@@ -85,12 +100,12 @@ export class DateFilter extends filter_base.FilterBase {
         var start_date = new Date(start_date_string);
         var end_date = new Date(end_date_string);
 
-        start_date = Date.UTC(start_date.getUTCFullYear(), start_date.getUTCMonth(), start_date.getUTCDate());
-        end_date = Date.UTC(end_date.getUTCFullYear(), end_date.getUTCMonth(), end_date.getUTCDate());
-        end_date += (1000 * 60 * 60 * 24) - 1;
+        var start_date_number = Date.UTC(start_date.getUTCFullYear(), start_date.getUTCMonth(), start_date.getUTCDate());
+        var end_date_number = Date.UTC(end_date.getUTCFullYear(), end_date.getUTCMonth(), end_date.getUTCDate());
+        end_date_number += (1000 * 60 * 60 * 24) - 1;
 
-        this.filter_start_date = start_date;
-        this.filter_end_date = end_date;
+        this.filter_start_date = start_date_number;
+        this.filter_end_date = end_date_number;
 
         this.send_filter_changed();
 
@@ -125,7 +140,7 @@ export class DateFilter extends filter_base.FilterBase {
     }
   }
 
-  get_utc_date(date_ms) {
+  get_utc_date(date_ms: any) {
     var date = new Date(date_ms);
     return new Date(date.getUTCFullYear(), date.getUTCMonth(), date.getUTCDate());
   }
@@ -144,4 +159,3 @@ export class DateFilter extends filter_base.FilterBase {
   }
 }
 
-module.exports = {'DateFilter': DateFilter};

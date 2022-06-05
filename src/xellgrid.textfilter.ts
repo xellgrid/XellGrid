@@ -1,8 +1,33 @@
-var $ = require('jquery');
-var _ = require('underscore');
-var filter_base = require('./xellgrid.filterbase.js');
-
+// import $ = require('jquery');
+import _ = require('underscore');
+import filter_base = require('./xellgrid.filterbase');
+declare var Slick: any;
 export class TextFilter extends filter_base.FilterBase {
+	public field: any;
+	public values: any;
+	public length: any;
+	public value_range: any;
+	public selected_rows: any;
+	public ignore_selection_changed: any;
+	public show_filter: any;
+	public update_timeout: any;
+	public filter_elem: any;
+	public filter_grid_elem: any;
+	public filter_grid: any;
+	public data_view: any;
+	public row_selection_model: any;
+	public grid_items: any;
+	public search_string: any;
+	public sort_comparer: any;
+	public column_header_elem: any;
+	public column_type: any;
+	public viewport_timeout: any;
+	public widget_model: any;
+	public security_search: any;
+	public filter_list: any;
+	public send_filter_changed: any;
+	public security_grid: any;
+	public excluded_rows: any;
 
   get_filter_html() {
     return `
@@ -26,7 +51,7 @@ export class TextFilter extends filter_base.FilterBase {
     `;
   }
 
-  handle_msg(msg) {
+  handle_msg(msg: any) {
     var column_info = msg.col_info;
     if (msg.type == 'update_data_view_filter'){
       this.update_data_view(column_info);
@@ -34,7 +59,7 @@ export class TextFilter extends filter_base.FilterBase {
     super.handle_msg(msg);
   }
 
-  update_min_max(col_info, has_active_filter) {
+  update_min_max(col_info: any, has_active_filter: any) {
     this.values = col_info.values;
     this.length = col_info.length;
     this.value_range = col_info.value_range;
@@ -47,7 +72,7 @@ export class TextFilter extends filter_base.FilterBase {
     this.ignore_selection_changed = false;
   }
 
-  update_data_view(col_info) {
+  update_data_view(col_info: any) {
     if (this.update_timeout) {
       clearTimeout(this.update_timeout);
     }
@@ -79,7 +104,7 @@ export class TextFilter extends filter_base.FilterBase {
   }
 
   update_slick_grid_data() {
-    this.grid_items = this.values.map(function (value, index) {
+    this.grid_items = this.values.map(function (value: any, index: any) {
       return {
         id: value,
         value: value
@@ -90,7 +115,7 @@ export class TextFilter extends filter_base.FilterBase {
       getLength: () => {
         return this.length;
       },
-      getItem: (i) => {
+      getItem: (i: any) => {
         var default_row = {
           id: 'row' + i,
           value: ''
@@ -111,7 +136,7 @@ export class TextFilter extends filter_base.FilterBase {
 
     this.update_slick_grid_data();
 
-    this.sort_comparer = (x, y) => {
+    this.sort_comparer = (x: any, y: any) => {
       var x_value = x.value;
       var y_value = y.value;
 
@@ -123,16 +148,16 @@ export class TextFilter extends filter_base.FilterBase {
       return x_value > y_value ? 1 : -1;
     };
 
-    var text_filter = (item, args) => {
-      if (this.search_string) {
-        if (item.value.toLowerCase().indexOf(this.search_string.toLowerCase()) == -1) {
-          return false;
-        }
-      }
-      return true;
-    };
+    // var text_filter = (item: any, args: any) => {
+    //   if (this.search_string) {
+    //     if (item.value.toLowerCase().indexOf(this.search_string.toLowerCase()) == -1) {
+    //       return false;
+    //     }
+    //   }
+    //   return true;
+    // };
 
-    var row_formatter = function (row, cell, value, columnDef, dataContext) {
+    var row_formatter = function (row: any, cell: any, value: any, columnDef: any, dataContext: any) {
       return "<span class='text-filter-value'>" + dataContext.value + "</span>";
     };
 
@@ -187,14 +212,14 @@ export class TextFilter extends filter_base.FilterBase {
       selectActiveRow: false
     });
     this.row_selection_model.onSelectedRangesChanged.subscribe(
-        (e, args) => this.handle_selection_changed(e, args)
+        (e: any, args: any) => this.handle_selection_changed(e, args)
     );
 
     this.filter_grid.setSelectionModel(this.row_selection_model);
     this.row_selection_model.setSelectedRows(this.selected_rows);
 
     if (this.column_type != 'any') {
-      this.filter_grid.onViewportChanged.subscribe((e, args) => {
+      this.filter_grid.onViewportChanged.subscribe((e: any, args: any) => {
         if (this.viewport_timeout) {
           clearTimeout(this.viewport_timeout);
         }
@@ -215,21 +240,21 @@ export class TextFilter extends filter_base.FilterBase {
     this.filter_grid.render();
 
     this.security_search = this.filter_elem.find(".search-input");
-    this.security_search.keyup((e) => this.handle_text_input_key_up(e));
-    this.security_search.click((e) => this.handle_text_input_click(e));
+    this.security_search.keyup((e: any) => this.handle_text_input_key_up(e));
+    this.security_search.click((e: any) => this.handle_text_input_click(e));
 
     this.filter_grid.onClick.subscribe(
-        (e, args) => this.handle_grid_clicked(e, args)
+        (e: any, args: any) => this.handle_grid_clicked(e, args)
     );
     this.filter_grid.onKeyDown.subscribe(
-        (e, args) => this.handle_grid_key_down(e, args)
+        (e: any, args: any) => this.handle_grid_key_down(e, args)
     );
 
-    this.filter_elem.find("a.select-all-link").click((e) => {
+    this.filter_elem.find("a.select-all-link").click((e: any) => {
       this.ignore_selection_changed = true;
       this.reset_filter();
       this.filter_list = "all";
-      var all_row_indices = [];
+      var all_row_indices: Array<number> = [];
       for (var i = 0; i < this.length; i++) {
         all_row_indices.push(i);
       }
@@ -245,10 +270,10 @@ export class TextFilter extends filter_base.FilterBase {
     }, 10);
   }
 
-  toggle_row_selected(row_index) {
+  toggle_row_selected(row_index: any) {
     var old_selected_rows = this.row_selection_model.getSelectedRows();
     // if the row is already selected, remove it from the selected rows array.
-    var selected_rows = old_selected_rows.filter(function (word) {
+    var selected_rows = old_selected_rows.filter(function (word: any) {
       return word !== row_index;
     });
     // otherwise add it to the selected rows array so it gets selected
@@ -258,7 +283,7 @@ export class TextFilter extends filter_base.FilterBase {
     this.row_selection_model.setSelectedRows(selected_rows);
   }
 
-  handle_grid_clicked(e, args) {
+  handle_grid_clicked(e: any, args: any) {
     this.toggle_row_selected(args.row);
     var active_cell = this.filter_grid.getActiveCell();
     if (!active_cell) {
@@ -266,7 +291,7 @@ export class TextFilter extends filter_base.FilterBase {
     }
   }
 
-  handle_grid_key_down(e, args) {
+  handle_grid_key_down(e: any, args: any) {
     var active_cell = this.filter_grid.getActiveCell();
     if (active_cell) {
       if (e.keyCode == 13) { // enter key
@@ -294,7 +319,7 @@ export class TextFilter extends filter_base.FilterBase {
     this.filter_grid.resetActiveCell();
   }
 
-  handle_text_input_key_up(e) {
+  handle_text_input_key_up(e: any) {
     var old_search_string = this.search_string;
     if (e.keyCode == 40) { // down arrow
       this.filter_grid.focus();
@@ -319,11 +344,11 @@ export class TextFilter extends filter_base.FilterBase {
     }
   }
 
-  handle_text_input_click(e) {
+  handle_text_input_click(e: any) {
     this.filter_grid.resetActiveCell();
   }
 
-  handle_selection_changed(e, args) {
+  handle_selection_changed(e: any, args: any) {
     if (this.ignore_selection_changed) {
       return false;
     }
@@ -380,5 +405,3 @@ export class TextFilter extends filter_base.FilterBase {
     };
   }
 }
-
-module.exports = {'TextFilter': TextFilter};

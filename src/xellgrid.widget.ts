@@ -1,13 +1,22 @@
-var widgets = require('@jupyter-widgets/base');
-var _ = require('underscore');
-var moment = require('moment');
-window.$ = window.jQuery = require('jquery');
-var date_filter = require('./xellgrid.datefilter.js');
-var slider_filter = require('./xellgrid.sliderfilter.js');
-var text_filter = require('./xellgrid.textfilter.js');
-var boolean_filter = require('./xellgrid.booleanfilter.js');
-var editors = require('./xellgrid.editors.js');
-var dialog = null;
+import widgets = require('@jupyter-widgets/base');
+import _ = require('underscore');
+import moment = require('moment');
+declare global {
+  interface Window {
+    $: any,
+    jQuery: any,
+    slick_grid: any
+  }
+}
+import $ = require("jquery");
+// import jQuery = require("jquery");
+// window.$ = window.jQuery = require('jquery');
+import date_filter = require('./xellgrid.datefilter');
+import slider_filter = require('./xellgrid.sliderfilter');
+import text_filter = require('./xellgrid.textfilter');
+import boolean_filter = require('./xellgrid.booleanfilter');
+import editors = require('./xellgrid.editors');
+// var dialog = null;
 
 //try {
 //  dialog = require('base/js/dialog');
@@ -16,40 +25,54 @@ var dialog = null;
 //               "Full screen button won't be available");
 //}
 
-var jquery_ui = require('jquery-ui-dist/jquery-ui.min.js');
+import 'jqueryui';
 
-require('slickgrid/slick.core.js');
-require('slickgrid/lib/jquery.event.drag-2.3.0.js');
-require('slickgrid/plugins/slick.rowselectionmodel.js');
-require('slickgrid/plugins/slick.checkboxselectcolumn.js');
-require('slickgrid/plugins/slick.contextmenu.js');
-require('slickgrid/slick.dataview.js');
-require('slickgrid/slick.grid.js');
-require('slickgrid/slick.editors.js');
-require('style-loader!slickgrid/slick.grid.css');
-require('style-loader!slickgrid/slick-default-theme.css');
-require('style-loader!jquery-ui-dist/jquery-ui.min.css');
-require('./xellgrid.css');
-require('./menu.css');
+import 'slickgrid/slick.core';
+import 'slickgrid/lib/jquery.event.drag-2.3.0'
+import 'slickgrid/plugins/slick.rowselectionmodel'
+import 'slickgrid/plugins/slick.checkboxselectcolumn'
+import 'slickgrid/plugins/slick.contextmenu'
+import 'slickgrid/slick.dataview'
+import 'slickgrid/slick.grid'
+import 'slickgrid/slick.editors'
+import 'style-loader!slickgrid/slick.grid.css'
+import 'style-loader!slickgrid/slick-default-theme.css'
+import 'style-loader!jquery-ui-dist/jquery-ui.min.css'
+import './xellgrid.css'
+import './menu.css'
 
+class MainMenu {
+  public activated: boolean;
+  public settings: any;
+  public mask: any;
+  public timeOut: any;
 
+  constructor(){
+    this.activated = false;
 
-var MainMenu = function () {
+    this.settings = {
+      disabledClass: 'disabled',
+      submenuClass: 'submenu'
+    }
 
-  var activated = false;
-
-  var settings = {
-    disabledClass: 'disabled',
-    submenuClass: 'submenu'
+    this.mask = '<div id="menu-top-mask" style="height: 2px; background-color: #fff; z-index:1001;"/>';
+    this.timeOut;
   }
 
-  var mask = '<div id="menu-top-mask" style="height: 2px; background-color: #fff; z-index:1001;"/>';
-  var timeOut;
-  this.init = function (p) {
+  init(p?: any) {
+    var activated = false;
+
+    var settings = {
+      disabledClass: 'disabled',
+      submenuClass: 'submenu'
+    }
+  
+    var mask = '<div id="menu-top-mask" style="height: 2px; background-color: #fff; z-index:1001;"/>';
+    var timeOut: any;
 
     $.extend(settings, p);
 
-    var $mask = $('#menu-top-mask');
+    // var $mask = $('#menu-top-mask');
 
     $('ul.main-menu > li').click(function (event) {
       var target = $(event.target);
@@ -97,7 +120,7 @@ var MainMenu = function () {
 
     //#region - Toggle Main Menu Item -
 
-    var toggleMenuItem = function (el) {
+    var toggleMenuItem = function (el: any) {
 
       // Hide all open submenus
       $('.active-sub-menu').removeClass('active-sub-menu').hide();
@@ -134,7 +157,7 @@ var MainMenu = function () {
 
       if (activated) {
         $('.active-menu').each(function () {
-          if ($(this).offset().left != el.offset().left) {
+          if ($(this).offset()!.left != el.offset().left) {
             $(this).removeClass('active-menu');
             $(this).find("ul:first").hide();
           }
@@ -146,7 +169,7 @@ var MainMenu = function () {
 
     //#region - Toggle Sub Menu Item -
 
-    var toggleSubMenu = function (el) {
+    var toggleSubMenu = function (el: any) {
 
       if (el.hasClass(settings.disabledClass)) {
         return;
@@ -199,9 +222,8 @@ var MainMenu = function () {
 }
 
 
-
 // Model for the xellgrid widget
-class XellgridModel extends widgets.DOMWidgetModel {
+export class XellgridModel extends widgets.DOMWidgetModel {
   defaults() {
     return _.extend(widgets.DOMWidgetModel.prototype.defaults(), {
       _model_name : 'XellgridModel',
@@ -218,7 +240,48 @@ class XellgridModel extends widgets.DOMWidgetModel {
 
 
 // View for the xellgrid widget
-class XellgridView extends widgets.DOMWidgetView {
+export class XellgridView extends widgets.DOMWidgetView {
+	public model: any;
+	public $el: any;
+	public toolbar: any;
+	public window_dropdown_menu: any;
+	public send: any;
+	public grid_elem: any;
+	public data_view: any;
+	public grid_options: any;
+	public index_col_name: any;
+	public row_styles: any;
+	public columns: any;
+	public index_columns: any;
+	public filters: any;
+	public filter_list: any;
+	public date_formats: any;
+	public last_vp: any;
+	public sort_in_progress: any;
+	public sort_indicator: any;
+	public resizing_column: any;
+	public ignore_selection_changed: any;
+	public vp_response_expected: any;
+	public next_viewport_msg: any;
+	public type_infos: any;
+	public loadValue: any;
+	public date_value: any;
+	public input: any;
+	public isValueChanged: any;
+	public serializeValue: any;
+	public slick_grid: any;
+	public grid_header: any;
+	public sorted_column: any;
+	public sort_ascending: any;
+	public viewport_timeout: any;
+	public resize_handles: any;
+	public df_range: any;
+	public df_length: any;
+	public buttons: any;
+	public update_timeout: any;
+	public multi_index: any;
+	public in_progress_btn: any;
+  public main_menu: any;
   render() {
     // subscribe to incoming messages from the QGridWidget
     this.model.on('msg:custom', this.handle_msg, this);
@@ -302,45 +365,45 @@ class XellgridView extends widgets.DOMWidgetView {
    this.bind_toolbar_events();
   }
 
-  bind_toolbar_events(message) {
-
+  bind_toolbar_events(message?: any) {
+    var that = this
     let activated = false
     // this will find the element with class = main-menu
     this.window_dropdown_menu.main_menu_bar = this.window_dropdown_menu.find('ul.main-menu');
-    this.window_dropdown_menu.main_menu_bar.mouseenter((e) =>{
-
+    this.window_dropdown_menu.main_menu_bar.mouseenter((e: any) =>{
       if(activated === false)
       {
-        new MainMenu().init();
+        that.main_menu = new MainMenu();
+        that.main_menu.init();
         activated = true
       }
     });
 
-
+    
     $('ul.main-menu > li > ul li').click(function (event) {
 
       // Prevent click event to propagate to parent elements
       event.stopPropagation();
 
       // Prevent any operations if item is disabled
-      if ($(this).hasClass(settings.disabledClass)) {
+      if ($(this).hasClass(that.main_menu.settings.disabledClass)) {
         return;
       }
 
       // If item is active, check if there are submenus (ul elements inside current li)
       if ($(this).has( "ul" ).length > 0) {
         // Automatically toggle submenu, if any
-        toggleSubMenu($(this));
+        that.main_menu.toggleSubMenu($(this));
       }
       else{
         // If there are no submenus, close main menu.
-        closeMainMenu();
+        that.main_menu.closeMainMenu();
       }
     });
 
 
 
-    this.window_dropdown_menu.main_menu_bar.click((event) => {
+    this.window_dropdown_menu.main_menu_bar.click((event: any) => {
       let target = $(event.target);
       if (!target.hasClass('active-menu') && !target.parents().hasClass('active-menu')) {
         this.send({'type': event.target.getAttribute("value")})
@@ -389,7 +452,7 @@ class XellgridView extends widgets.DOMWidgetView {
     };
 
     var self = this;
-
+    
     this.type_infos = {
       integer: Object.assign(
         { editor: Slick.Editors.Integer },
@@ -406,8 +469,11 @@ class XellgridView extends widgets.DOMWidgetView {
       },
       datetime: {
         filter: date_filter.DateFilter,
-        editor: class DateEditor extends Slick.Editors.Date {
-          constructor(args) {
+        editor: class DateEditor extends Slick.Editors.Date<any> {
+          public date_value: any
+          public input: any
+          public serializeValue: any
+          constructor(args: any) {
             super(args);
 
             this.loadValue = (item) => {
@@ -419,7 +485,7 @@ class XellgridView extends widgets.DOMWidgetView {
               this.input.val(formatted_val);
               this.input[0].defaultValue = formatted_val;
               this.input.select();
-              this.input.on("keydown.nav", function (e) {
+              this.input.on("keydown.nav", function (e: any) {
                 if (e.keyCode === $.ui.keyCode.LEFT || e.keyCode === $.ui.keyCode.RIGHT) {
                   e.stopImmediatePropagation();
                 }
@@ -441,7 +507,7 @@ class XellgridView extends widgets.DOMWidgetView {
             };
           }
         },
-        formatter: (row, cell, value, columnDef, dataContext) => {
+        formatter: (row: any, cell: any, value: any, columnDef: any, dataContext: any) => {
           if (value === null){
             return "NaT";
           }
@@ -459,7 +525,7 @@ class XellgridView extends widgets.DOMWidgetView {
       boolean: {
         filter: boolean_filter.BooleanFilter,
         editor: Slick.Editors.Checkbox,
-        formatter: (row, cell, value, columngDef, dataContext) => {
+        formatter: (row: any, cell: any, value: any, columngDef: any, dataContext: any) => {
           return value ? `<span class="fa fa-check"/>` : "";
         }
       }
@@ -467,17 +533,17 @@ class XellgridView extends widgets.DOMWidgetView {
 
     $.datepicker.setDefaults({
       gotoCurrent: true,
-      dateFormat: $.datepicker.ISO_8601,
+      dateFormat: 'yyyy-mm-dd',
       constrainInput: false,
       "prevText": "",
       "nextText": ""
     });
 
     var sorted_columns = Object.values(columns).sort(
-        (a, b) => a.position - b.position
+        (a: any, b: any) => a.position - b.position
     );
-
-    for(let cur_column of sorted_columns){
+    let cur_column: any 
+    for( cur_column of sorted_columns){
       if (cur_column.name == this.index_col_name){
         continue;
       }
@@ -545,7 +611,7 @@ class XellgridView extends widgets.DOMWidgetView {
       this.columns = this.index_columns.concat(this.columns);
     }
 
-    var row_count = 0;
+    // var row_count = 0;
 
     // set window.slick_grid for easy troubleshooting in the js console
     window.slick_grid = this.slick_grid = new Slick.Grid(
@@ -581,7 +647,7 @@ class XellgridView extends widgets.DOMWidgetView {
     
     this.update_size();
 
-    var render_header_cell = (e, args) => {
+    var render_header_cell = (e: any, args: any) => {
       var cur_filter = this.filters[args.column.id];
         if (cur_filter) {
           cur_filter.render_filter_button($(args.node), this.slick_grid);
@@ -603,7 +669,7 @@ class XellgridView extends widgets.DOMWidgetView {
     this.slick_grid.setSortColumns([]);
 
     this.grid_header = this.$el.find('.slick-header-columns');
-    var handle_header_click = (e) => {
+    var handle_header_click = (e: any) => {
       if (this.resizing_column) {
         return;
       }
@@ -665,12 +731,12 @@ class XellgridView extends widgets.DOMWidgetView {
       // which column to show the command list? when not defined it will be shown over all columns
       commandItems: [
         { command: "remove_row", title: "Delete A Row",
-          action: (e, args) => {
+          action: (e: any, args: any) => {
             this.send({'type': "remove_row"})
           }
         },
         { command: "add_empty_row", title: "Add A Row", iconImage: "../images/delete.png", cssClass: "bold", textCssClass: "red",
-          action: (e, args) => {
+          action: (e: any, args: any) => {
             this.send({'type': "add_empty_row"})
           }
         },
@@ -689,10 +755,10 @@ class XellgridView extends widgets.DOMWidgetView {
         {
           option: 0, title: "none", textCssClass: "italic",
           // only enable this option when there's no Effort Driven
-          itemUsabilityOverride: function (args) {
+          itemUsabilityOverride: function (args: any) {
           },
           // you can use the "action" callback and/or subscribe to the "onCallback" event, they both have the same arguments
-          action: function (e, args) {
+          action: function (e: any, args: any) {
             // action callback.. do something
           },
         },
@@ -705,7 +771,7 @@ class XellgridView extends widgets.DOMWidgetView {
         {
           option: 4, title: "Extreme", disabled: true,
           // only shown when there's no Effort Driven
-          itemVisibilityOverride: function (args) {
+          itemVisibilityOverride: function (args: any) {
           }
         },
       ]
@@ -713,17 +779,17 @@ class XellgridView extends widgets.DOMWidgetView {
 
     let contextMenuPlugin = new Slick.Plugins.ContextMenu(contextMenuOptions);
     this.slick_grid.registerPlugin(contextMenuPlugin);
-    contextMenuPlugin.onBeforeMenuShow.subscribe((e, args) =>{
+    contextMenuPlugin.onBeforeMenuShow.subscribe((e: any, args: any) =>{
       // for example, you could select the row it was clicked with
       this.slick_grid.setSelectedRows([args.row], e.target); // select the entire row
       //this.slick_grid.setActiveCell(args.row, args.cell, false); // select the cell that the click originated
       console.log("Before the global Context Menu is shown", args);
     });
-    contextMenuPlugin.onBeforeMenuClose.subscribe(function (e, args) {
+    contextMenuPlugin.onBeforeMenuClose.subscribe(function (e: any, args: any) {
       console.log("Global Context Menu is closing", args);
     });
 
-    contextMenuPlugin.onAfterMenuShow.subscribe(function (e, args) {
+    contextMenuPlugin.onAfterMenuShow.subscribe(function (e: any, args: any) {
       // for example, you could select the row it was clicked with
       // grid.setSelectedRows([args.row]); // select the entire row
       //this.slick_grid.setActiveCell(args.row, args.cell, false); // select the cell that the click originated
@@ -732,7 +798,7 @@ class XellgridView extends widgets.DOMWidgetView {
 
 
 
-    this.slick_grid.onViewportChanged.subscribe((e) => {
+    this.slick_grid.onViewportChanged.subscribe((e: any) => {
       if (this.viewport_timeout){
         clearTimeout(this.viewport_timeout);
       }
@@ -760,13 +826,13 @@ class XellgridView extends widgets.DOMWidgetView {
     // set up callbacks
     let editable_rows = this.model.get('_editable_rows');
     if (editable_rows && Object.keys(editable_rows).length > 0) {
-      this.slick_grid.onBeforeEditCell.subscribe((e, args) => {
+      this.slick_grid.onBeforeEditCell.subscribe((e: any, args: any) => {
         editable_rows = this.model.get('_editable_rows');
         return editable_rows[args.item[this.index_col_name]]
       });
     }
 
-    this.slick_grid.onCellChange.subscribe((e, args) => {
+    this.slick_grid.onCellChange.subscribe((e: any, args: any) => {
       var column = this.columns[args.cell].name;
       var data_item = this.slick_grid.getDataItem(args.row);
       var msg = {'row_index': data_item.row_index, 'column': column,
@@ -775,7 +841,7 @@ class XellgridView extends widgets.DOMWidgetView {
       this.send(msg);
     });
 
-    this.slick_grid.onSelectedRowsChanged.subscribe((e, args) => {
+    this.slick_grid.onSelectedRowsChanged.subscribe((e: any, args: any) => {
       if (!this.ignore_selection_changed) {
         var msg = {'rows': args.rows, 'type': 'change_selection'};
         this.send(msg);
@@ -791,7 +857,7 @@ class XellgridView extends widgets.DOMWidgetView {
       });
 
       this.resize_handles = this.grid_header.find('.slick-resizable-handle');
-      this.resize_handles.mousedown((e) => {
+      this.resize_handles.mousedown((e: any) => {
         this.resizing_column = true;
       });
       $(document).mouseup(() => {
@@ -804,7 +870,7 @@ class XellgridView extends widgets.DOMWidgetView {
     }, 1);
   }
 
-  processPhosphorMessage(msg) {
+  processPhosphorMessage(msg: any) {
     super.processPhosphorMessage(msg)
     switch (msg.type) {
     case 'resize':
@@ -830,14 +896,14 @@ class XellgridView extends widgets.DOMWidgetView {
    * Main entry point for drawing the widget,
    * including toolbar buttons if necessary.
    */
-  create_data_view(df) {
+  create_data_view(df: any) {
     let df_range = this.df_range = this.model.get("_df_range");
     let df_length = this.df_length = this.model.get("_row_count");
     return {
       getLength: () => {
         return df_length;
       },
-      getItem: (i) => {
+      getItem: (i: any) => {
         if (i >= df_range[0] && i < df_range[1]){
           var row = df[i - df_range[0]] || {};
           row.row_index = i;
@@ -849,17 +915,17 @@ class XellgridView extends widgets.DOMWidgetView {
     };
   }
 
-  set_data_view(data_view) {
+  set_data_view(data_view: any) {
     this.data_view = data_view;
     this.slick_grid.setData(data_view);
   }
 
-  format_date(date_string, col_name) {
+  format_date(date_string: any, col_name: any) {
     if (!date_string) {
       return "";
     }
     var parsed_date = moment.parseZone(date_string, "YYYY-MM-DDTHH:mm:ss.SSSZ");
-    var date_format = null;
+    var date_format: string | undefined = undefined;
     if (parsed_date.millisecond() != 0){
        date_format = `YYYY-MM-DD HH:mm:ss.SSS`;
     } else if (parsed_date.second() != 0){
@@ -888,11 +954,11 @@ class XellgridView extends widgets.DOMWidgetView {
     return parsed_date.format(date_format);
   }
 
-  format_string(row, cell, value, columnDef, dataContext) {
+  format_string(row: any, cell: any, value: any, columnDef: any, dataContext: any) {
     return value;
   }
 
-  format_number(row, cell, value, columnDef, dataContext) {
+  format_number(row: any, cell: any, value: any, columnDef: any, dataContext: any) {
     if (value === null){
       return 'NaN';
     }
@@ -902,7 +968,7 @@ class XellgridView extends widgets.DOMWidgetView {
   /**
    * Handle messages from the QGridWidget.
    */
-  handle_msg(msg) {
+  handle_msg(msg: any) {
     if (msg.type === 'draw_table') {
       this.initialize_slick_grid();
     } else if (msg.type == 'show_error') {
@@ -991,7 +1057,7 @@ class XellgridView extends widgets.DOMWidgetView {
           this.slick_grid.scrollRowIntoView(this.last_vp.bottom);
         }
 
-        var selected_rows = this.slick_grid.getSelectedRows().filter((row) => {
+        var selected_rows = this.slick_grid.getSelectedRows().filter((row: any) => {
           return row < Math.min(this.df_length, this.df_range[1]);
         });
         this.send({
@@ -1059,7 +1125,7 @@ class XellgridView extends widgets.DOMWidgetView {
   }
 }
 
-module.exports = {
-  XellgridModel : XellgridModel,
-  XellgridView : XellgridView
-};
+// module.exports = {
+//   XellgridModel : XellgridModel,
+//   XellgridView : XellgridView
+// };
