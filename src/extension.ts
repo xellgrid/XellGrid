@@ -3,6 +3,18 @@
 // which is required for any notebook extension.
 
 // Configure requirejs
+
+
+declare global {
+    interface Window {
+        require: {
+            config: any;
+      };
+    }
+}
+  
+
+
 if (window.require) {
     window.require.config({
         map: {
@@ -14,6 +26,4 @@ if (window.require) {
 }
 
 // Export the required load_ipython_extension
-module.exports = {
-    load_ipython_extension: function() {}
-};
+export function load_ipython_extension(): void {};

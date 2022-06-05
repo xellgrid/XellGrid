@@ -41,13 +41,16 @@ module.exports = [
      // "load_ipython_extension" function which is required for any notebook
      // extension.
      //
-        entry: './src/extension.js',
+        entry: './src/extension.ts',
         output: {
-            filename: 'extension.js',
+            filename: 'extension.ts',
             path: path.resolve(__dirname, 'lib'),
             libraryTarget: 'amd'
         },
         plugins: plugins,
+        module: {
+            rules: rules
+        },
         resolve: {
             extensions: ['.ts', '.js']
         },
@@ -69,6 +72,9 @@ module.exports = [
         devtool: 'source-map',
         module: {
             rules: rules
+        },
+        resolve: {
+            extensions: ['.ts', '.js']
         },
         externals: ['@jupyter-widgets/base', '@jupyter-widgets/controls'],
         plugins: plugins,
@@ -98,6 +104,9 @@ module.exports = [
         devtool: 'source-map',
         module: {
             rules: rules
+        },
+        resolve: {
+            extensions: ['.ts', '.js']
         },
         externals: ['@jupyter-widgets/base', '@jupyter-widgets/controls'],
         plugins: plugins,

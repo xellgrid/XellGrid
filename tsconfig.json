@@ -20,7 +20,10 @@
     "strict": true,
     "strictNullChecks": true,
     "target": "es2017",
-    "types": []
+    "typeRoots": [
+      "./node_modules/@types",
+      "./types"
+    ]
   },
   "include": ["src/*"]
 }

@@ -1,7 +1,15 @@
-var $ = require('jquery');
-var filter_base = require('./xellgrid.filterbase.js');
+import $ from 'jquery';
+import filter_base = require('./xellgrid.filterbase');
 
 export class BooleanFilter extends filter_base.FilterBase {
+	public field: any;
+	public values: any;
+	public length: any;
+	public selected: any;
+	public show_filter: any;
+	public radio_buttons: any;
+	public filter_elem: any;
+	public send_filter_changed: any;
 
   get_filter_html() {
     return `
@@ -30,7 +38,7 @@ export class BooleanFilter extends filter_base.FilterBase {
     `;
   }
 
-  update_min_max(col_info, has_active_filter) {
+  update_min_max(col_info: any, has_active_filter: any) {
     this.values = col_info.values;
     this.length = col_info.length;
     if('filter_info' in col_info){
@@ -45,7 +53,7 @@ export class BooleanFilter extends filter_base.FilterBase {
     super.initialize_controls();
     this.radio_buttons = this.filter_elem.find('.bool-filter-radio');
 
-    this.filter_elem.find('label').click((e) => {
+    this.filter_elem.find('label').click((e: any) => {
       var radio_id = $(e.currentTarget).attr('for');
       this.radio_buttons.filter(`#${radio_id}`).click();
     });
@@ -90,5 +98,3 @@ export class BooleanFilter extends filter_base.FilterBase {
     };
   }
 }
-
-module.exports = {'BooleanFilter': BooleanFilter};
