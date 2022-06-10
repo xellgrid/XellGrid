@@ -22,6 +22,8 @@ from .grid_default_settings import defaults
 from .grid_event_handlers import EventHandlers, handlers
 from .grid_utils import stringify
 
+from xellgrid.grid_row_operations.add_rows import spreadsheet_insert_rows, spreadsheet_duplicate_last_row
+
 # versions of pandas prior to version 0.20.0 don't support the orient='table'
 # when calling the 'to_json' function on DataFrames.  to get around this we
 # have our own copy of the panda's 0.20.0 implementation that we use for old
@@ -128,7 +130,7 @@ class XellgridWidget(widgets.DOMWidget):
     def __init__(self, *args, **kwargs):
         self.id = str(uuid4())
         self._initialized = False
-        super(XellgridWidget, self).__init__(*args, **kwargs)
+        super().__init__(*args, **kwargs)
         # register a callback for custom messages
         self.on_msg(self._handle_xellgrid_msg)
         self._initialized = True
@@ -366,6 +368,8 @@ class XellgridWidget(widgets.DOMWidget):
         from_index = max(self._viewport_range[0] - PAGE_SIZE, 0)
         to_index = max(self._viewport_range[0] + PAGE_SIZE, 0)
         new_df_range = (from_index, to_index)
+
+        #TODO register all events to an event enum
 
         if triggered_by == 'viewport_changed' and \
                 self._df_range == new_df_range:
@@ -938,7 +942,7 @@ class XellgridWidget(widgets.DOMWidget):
             self.log.exception("Unhandled exception while handling msg")
 
     def _handle_xellgrid_msg_helper(self, content):
-        """Handle incoming messages from the XelGridView"""
+        """Handle incoming messages from the XellGridView"""
         if 'type' not in content:
             return
 
@@ -1140,30 +1144,17 @@ class XellgridWidget(widgets.DOMWidget):
 
     def _duplicate_last_row(self):
         """
-        Append a row at the end of the DataFrame by duplicating the
-        last row and incrementing it's index by 1. The method is only
-        available for DataFrames that have an integer index.
+        Insert a row at the end of the DataFrame by duplicating the
+        last row and incrementing the index by 1.
         """
-        df = self._df
+        max_index = max(self._df.index)
+        self._df = spreadsheet_duplicate_last_row(self._df)
 
-        if not df.index.is_integer():
-            msg = "Cannot add a row to a table with a non-integer index"
-            self.send({
-                'type': 'show_error',
-                'error_msg': msg,
-                'triggered_by': 'add_row'
-            })
-            return
-
-        last_index = max(df.index)
-        last = df.loc[last_index].copy()
-        last.name += 1
-        last[self._index_col_name] = last.name
-        df.loc[last.name] = last.values
-        self._unfiltered_df.loc[last.name] = last.values
+        # the duplicate record will be concatenated to the unfiltered_df
+        self._unfiltered_df = spreadsheet_insert_rows(self._unfiltered_df, self._df.iloc[[max_index]], max_index + 1)
         self._update_table(triggered_by='add_row',
-                           scroll_to_row=df.index.get_loc(last.name))
-        return last.name
+                           scroll_to_row=self._df.index.get_loc(max_index))
+        return max_index + 1
 
     def _add_empty_row(self):
         self._df = pd.DataFrame([[np.nan] * len(self._df.columns)], columns=self._df.columns).concat(self._df,
