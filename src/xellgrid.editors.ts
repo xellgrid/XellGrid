@@ -4,11 +4,14 @@
  * Adapted from https://github.com/mleibman/SlickGrid/blob/master/slick.editors.js
  * MIT License, Copyright (c) 2010 Michael Leibman
  */
-var $ = require('jquery');
-require('slickgrid/slick.editors.js');
+import $ from 'jquery';
+import 'slickgrid/slick.editors';
 
 export class IndexEditor {
-  constructor(args){
+	public column_info: any;
+	public $cell: any;
+
+  constructor(args: any){
     this.column_info = args.column;
     this.$cell = $(args.container);
     this.$cell.attr('title',
@@ -17,7 +20,7 @@ export class IndexEditor {
     this.$cell.tooltip('enable');
     this.$cell.tooltip("open");
     // automatically hide it after 4 seconds
-    setTimeout((event, ui) => {
+    setTimeout((event: any, ui:any) => {
       this.$cell.tooltip('destroy');
       args.cancelChanges();
     }, 3000);
@@ -27,7 +30,7 @@ export class IndexEditor {
 
   focus() {}
 
-  loadValue(item) {
+  loadValue(item: any) {
     this.$cell.text(
         this.column_info.formatter(
             null, null, item[this.column_info.field], this.column_info, null
@@ -37,7 +40,7 @@ export class IndexEditor {
 
   serializeValue() {}
 
-  applyValue(item, state) {}
+  applyValue(item: any, state:any) {}
 
   isValueChanged() {
     return false;
@@ -53,7 +56,12 @@ export class IndexEditor {
 
 //  http://stackoverflow.com/a/22118349
 export class SelectEditor {
-  constructor(args) {
+	public column_info: any;
+	public options: any;
+	public elem: any;
+	public defaultValue: any;
+
+  constructor(args:any) {
     this.column_info = args.column;
     this.options = [];
     if (this.column_info.editorOptions.options) {
@@ -62,7 +70,7 @@ export class SelectEditor {
       this.options = ["yes", "no"];
     }
     
-    var option_str = "";
+    // var option_str = "";
 
     this.elem = $("<SELECT tabIndex='0' class='editor-select'>");
 
@@ -86,7 +94,7 @@ export class SelectEditor {
     this.elem.focus();
   }
 
-  loadValue(item) {
+  loadValue(item:any) {
     this.defaultValue = item[this.column_info.field];
     this.elem.val(this.defaultValue);
   }
@@ -99,7 +107,7 @@ export class SelectEditor {
     }
   }
 
-  applyValue(item, state) {
+  applyValue(item:any, state:any) {
     item[this.column_info.field] = state;
   }
 
@@ -118,7 +126,7 @@ export class SelectEditor {
 /**
  * Validator for numeric cells.
  */
-export var validateNumber = (value) => {
+export var validateNumber = (value:any) => {
   if (isNaN(value)) {
     return {
       valid: false,
@@ -129,10 +137,4 @@ export var validateNumber = (value) => {
     valid: true,
     msg: null
   };
-};
-
-module.exports = {
-  'validateNumber': validateNumber,
-  'SelectEditor': SelectEditor,
-  'IndexEditor': IndexEditor
 };

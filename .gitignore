@@ -10,6 +10,7 @@ xellgrid/.ipynb_checkpoints
 xellgrid/dask-worker-space
 xellgrid/static
 
+.vscode/
 .github
 .ipynb_checkpoints
 _temp_extension

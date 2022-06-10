@@ -1,6 +1,20 @@
-var filter_base = require('./xellgrid.filterbase.js');
+import filter_base = require('./xellgrid.filterbase');
 
 export class SliderFilter extends filter_base.FilterBase {
+	public field: any;
+	public slider_elem: any;
+	public filter_elem: any;
+	public filter_value_min: any;
+	public min_value: any;
+	public filter_value_max: any;
+	public max_value: any;
+	public slide_timeout: any;
+	public send_filter_changed: any;
+	public column_type: any;
+	public precision: any;
+	public has_multiple_values: any;
+	public show_filter: any;
+	public update_filter_button_disabled: any;
 
   get_filter_html() {
     return `
@@ -41,7 +55,7 @@ export class SliderFilter extends filter_base.FilterBase {
       max: this.max_value,
       values: values_to_set,
       step: this.get_slider_step(),
-      slide: (event, ui) => {
+      slide: (event: any, ui: any) => {
         if (this.slide_timeout) {
           clearTimeout(this.slide_timeout);
         }
@@ -66,7 +80,7 @@ export class SliderFilter extends filter_base.FilterBase {
     });
   }
 
-  set_value(min_val, max_val) {
+  set_value(min_val: any, max_val: any) {
     var min_val_rounded, max_val_rounded;
     if (this.column_type == 'integer') {
       min_val_rounded = min_val.toFixed(0);
@@ -107,7 +121,7 @@ export class SliderFilter extends filter_base.FilterBase {
     return this.filter_value_min != null || this.filter_value_max != null;
   }
 
-  update_min_max(col_info, has_active_filter) {
+  update_min_max(col_info: any, has_active_filter: any) {
     this.min_value = col_info.slider_min;
     this.max_value = col_info.slider_max;
 
@@ -137,5 +151,3 @@ export class SliderFilter extends filter_base.FilterBase {
     };
   }
 }
-
-module.exports = {'SliderFilter': SliderFilter};

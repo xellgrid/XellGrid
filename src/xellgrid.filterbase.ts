@@ -1,7 +1,21 @@
-var $ = require('jquery');
+import $ from 'jquery';
 
 export class FilterBase {
-  constructor(field, column_type, xellgrid) {
+	public field: any;
+	public column_type: any;
+	public xellgrid: any;
+	public widget_model: any;
+	public precision: any;
+	public has_multiple_values: any;
+	public filter_btn: any;
+	public column_header_elem: any;
+	public slick_grid: any;
+	public filter_icon: any;
+	public filter_elem: any;
+	public disabled_tooltip_showing: any;
+	public prev_column_separator: any;
+
+  constructor(field:any, column_type:any, xellgrid:any) {
     this.field = field;
     this.column_type = column_type;
     this.xellgrid = xellgrid;
@@ -12,18 +26,18 @@ export class FilterBase {
     this.has_multiple_values = true;
   }
 
-  handle_msg(msg) {
+  handle_msg(msg:any) {
     var column_info = msg.col_info;
     if (msg.type == 'column_min_max_updated'){
       this.update_min_max(column_info, this.xellgrid.has_active_filter());
     }
   }
 
-  update_min_max(column_info, has_active_filter) {
+  update_min_max(column_info:any, has_active_filter:any) {
     throw new Error("not implemented!");
   }
 
-  render_filter_button(column_header_elem, slick_grid) {
+  render_filter_button(column_header_elem:any, slick_grid:any) {
     if (this.filter_btn)
       this.filter_btn.off();
 
@@ -36,7 +50,7 @@ export class FilterBase {
     `);
     this.filter_icon = this.filter_btn.find('.filter-icon');
     this.filter_btn.appendTo(this.column_header_elem);
-    this.filter_btn.click((e) => this.handle_filter_button_clicked(e));
+    this.filter_btn.click((e:any) => this.handle_filter_button_clicked(e));
   }
 
   create_filter_elem() {
@@ -56,7 +70,7 @@ export class FilterBase {
     this.disabled_tooltip_showing = true;
   }
 
-  get_filter_html() {
+  get_filter_html(): string | never {
     throw new Error("not implemented!");
   }
 
@@ -73,11 +87,11 @@ export class FilterBase {
     }
   }
 
-  is_active() {
+  is_active(): boolean | never {
     throw new Error("not implemented!");
   }
 
-  handle_filter_button_clicked(e) {
+  handle_filter_button_clicked(e: any) {
     if (this.filter_btn.hasClass('active')){
       this.hide_filter();
       e.stopPropagation();
@@ -152,16 +166,16 @@ export class FilterBase {
 
   initialize_controls() {
     this.filter_elem.find("a.reset-link").click(
-        (e) => this.reset_filter()
+        (e: any) => this.reset_filter()
     );
     this.filter_elem.find("i.close-button").click(
-        (e) => this.hide_filter()
+        (e: any) => this.hide_filter()
     );
     $(document.body).bind("mousedown",
-        (e) => this.handle_body_mouse_down(e)
+        (e: any) => this.handle_body_mouse_down(e)
     );
     $(document.body).bind("keyup",
-        (e) => this.handle_body_key_up(e)
+        (e: any) => this.handle_body_key_up(e)
     );
   }
 
@@ -180,7 +194,7 @@ export class FilterBase {
     this.widget_model.send(msg);
   }
 
-  handle_body_mouse_down(e) {
+  handle_body_mouse_down(e: any) {
     if (this.filter_elem && this.filter_elem[0] != e.target && !$.contains(this.filter_elem[0], e.target) &&
         !$.contains(this.filter_btn[0], e.target) &&
         $(e.target).closest(".filter-child-elem").length == 0) {
@@ -189,7 +203,7 @@ export class FilterBase {
     return true;
   }
 
-  handle_body_key_up(e) {
+  handle_body_key_up(e: any) {
     if (e.keyCode == 27) { // esc key
       this.hide_filter();
     }
@@ -203,5 +217,3 @@ export class FilterBase {
     throw new Error("not implemented!");
   }
 }
-
-module.exports = {'FilterBase': FilterBase};
