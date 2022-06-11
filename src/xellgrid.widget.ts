@@ -15,6 +15,7 @@ import 'slickgrid/lib/jquery.event.drag-2.3.0'
 import 'slickgrid/plugins/slick.rowselectionmodel'
 import 'slickgrid/plugins/slick.checkboxselectcolumn'
 import 'slickgrid/plugins/slick.contextmenu'
+import 'slickgrid/plugins/slick.contextmenu.css'
 import 'slickgrid/slick.dataview'
 import 'slickgrid/slick.grid'
 import 'slickgrid/slick.editors'
@@ -725,15 +726,25 @@ export class XellgridView extends widgets.DOMWidgetView {
             this.send({'type': "remove_row"})
           }
         },
-        { command: "add_empty_row", title: "Add A Row", iconImage: "../images/delete.png", cssClass: "bold", textCssClass: "red",
+        { command: "add_empty_row", title: "Add A Empty Row", iconImage: "", cssClass: "bold", textCssClass: "red",
           action: (e: any, args: any) => {
-            this.send({'type': "add_empty_row"})
+            this.send({
+              'type': "add_empty_row",
+              'row': args.row,
+              'cell': args.cell
+            })
           }
         },
-        { divider: true },
-        {
-          command: "help", title: "Help", iconCssClass: "icon-help"
-        }
+        { 
+          command: "add_row", title: "Duplicate Last Row", iconImage: "", cssClass: "bold", textCssClass: "red",
+          action: (e: any, args: any) => {
+            this.send({'type': "add_row"})
+          }
+        },
+        // { divider: true },
+        // {
+        //   command: "help", title: "Help", iconCssClass: "icon-help"
+        // }
       ],
 
       // Options allows you to edit a column from an option chose a list
@@ -770,6 +781,8 @@ export class XellgridView extends widgets.DOMWidgetView {
     let contextMenuPlugin = new (Slick as any).Plugins.ContextMenu(contextMenuOptions);
     this.slick_grid.registerPlugin(contextMenuPlugin);
     contextMenuPlugin.onBeforeMenuShow.subscribe((e: any, args: any) =>{
+      e.preventDefault();
+      e.stopPropagation();
       // for example, you could select the row it was clicked with
       this.slick_grid.setSelectedRows([args.row], e.target); // select the entire row
       //this.slick_grid.setActiveCell(args.row, args.cell, false); // select the cell that the click originated
