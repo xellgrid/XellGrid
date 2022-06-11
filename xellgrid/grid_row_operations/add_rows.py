@@ -1,4 +1,5 @@
 import pandas as pd
+from xellgrid.common.xellgrid_constants import UNFILTERED_COL_INDEX_NAME
 
 """
 Basic construction of adding rows in a spreadsheet
@@ -34,6 +35,23 @@ def spreadsheet_insert_rows(df, rows, selected_row_index, ignore_index=True):
         df = pd.concat([df, rows], ignore_index=ignore_index)
 
     return df.reset_index(drop=True)
+
+
+def spreadsheet_duplicate_last_row(df, ignore_index=True, unfiltered_index=UNFILTERED_COL_INDEX_NAME):
+    """
+    duplicate the last row of a dataframe
+    :param df:
+    :param ignore_index:
+    :param unfiltered_index: used to do unfiltered indexing
+    :return:
+    """
+
+    max_index = max(df.index)
+    last_row = df.iloc[[max_index]]
+    if unfiltered_index in df.columns:
+        last_row[unfiltered_index] = max_index + 1
+
+    return spreadsheet_insert_rows(df, last_row, max_index + 1, ignore_index).reset_index(drop=True)
 
 
 
