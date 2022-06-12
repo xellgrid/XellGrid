@@ -730,8 +730,7 @@ export class XellgridView extends widgets.DOMWidgetView {
           action: (e: any, args: any) => {
             this.send({
               'type': "add_empty_row",
-              'row': args.row,
-              'cell': args.cell
+              'row': args.row
             })
           }
         },
