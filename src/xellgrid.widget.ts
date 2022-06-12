@@ -726,7 +726,7 @@ export class XellgridView extends widgets.DOMWidgetView {
             this.send({'type': "remove_row"})
           }
         },
-        { command: "add_empty_row", title: "Add A Empty Row", iconImage: "", cssClass: "bold", textCssClass: "red",
+        { command: "add_empty_row", title: "Add An Empty Row", iconImage: "", cssClass: "bold", textCssClass: "red",
           action: (e: any, args: any) => {
             this.send({
               'type': "add_empty_row",
