@@ -18,6 +18,7 @@ from traitlets import (
 
 from uuid import uuid4
 
+from .common.dataframe_utils import zero_out_dataframe
 from .grid_default_settings import defaults
 from .grid_event_handlers import EventHandlers, handlers
 from .grid_utils import stringify
@@ -1009,6 +1010,14 @@ class XellgridWidget(widgets.DOMWidget):
                 'index': row_index,
                 'source': 'gui'
             })
+        elif content['type'] == 'add_empty_row':
+            row_index = content['row']
+            new_index = self._add_empty_row(row_index)
+            self._notify_listeners({
+                'name': 'row_added',
+                'index': new_index,
+                'source': 'gui'
+            })
         elif content['type'] == 'remove_row':
             removed_indices = self._remove_rows()
             self._notify_listeners({
@@ -1156,9 +1165,20 @@ class XellgridWidget(widgets.DOMWidget):
                            scroll_to_row=self._df.index.get_loc(max_index))
         return max_index + 1
 
-    def _add_empty_row(self):
-        self._df = pd.DataFrame([[np.nan] * len(self._df.columns)], columns=self._df.columns).concat(self._df,
-                                                                                                     ignore_index=True)
+    def _add_empty_row(self, row_index):
+        """Add empty row into current row_index
+
+        Parameters
+        ----------
+            row_index (int): current selected row index
+        """
+        new_row = self._df.iloc[[row_index]]
+        new_row = zero_out_dataframe(new_row)
+        self._df = spreadsheet_insert_rows(self._df, new_row, row_index + 1)
+        self._unfiltered_df = spreadsheet_insert_rows(self._unfiltered_df, new_row, row_index + 1)
+        
+        self._update_table(triggered_by='add_empty_row',
+                           scroll_to_row=self._df.index.get_loc(row_index))
 
     def _add_row(self, row):
         """
