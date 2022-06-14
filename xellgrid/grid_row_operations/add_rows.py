@@ -47,7 +47,7 @@ def spreadsheet_duplicate_last_row(df, ignore_index=True, unfiltered_index=UNFIL
     """
 
     max_index = max(df.index)
-    last_row = df.iloc[[max_index]]
+    last_row = df.iloc[[max_index]].copy()
     if unfiltered_index in df.columns:
         last_row[unfiltered_index] = max_index + 1
 
