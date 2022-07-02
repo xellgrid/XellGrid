@@ -740,6 +740,12 @@ export class XellgridView extends widgets.DOMWidgetView {
             this.send({'type': "add_row"})
           }
         },
+        {
+          command: "add_new_tab", title: "Add New Tab", iconImage: "", cssClass: "", textCssClass: "",
+          action: (e: any, args: any) => {
+            this.send({'type': "add_new_tab"})
+          }
+        }
         // { divider: true },
         // {
         //   command: "help", title: "Help", iconCssClass: "icon-help"

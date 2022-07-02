@@ -1,8 +1,11 @@
-import pandas as pd
-
-from IPython.display import display
 from numbers import Integral
-from xellgrid import defaults, XellgridWidget
+import uuid
+
+from ipywidgets import Tab
+
+import pandas as pd
+from IPython.display import display
+from xellgrid import XellgridWidget, defaults
 
 
 def _display_as_xellgrid(data):
@@ -51,6 +54,7 @@ def disable():
 
 
 def show_grid(data_frame,
+              title=str(uuid.uuid4()).split("-")[0],
               show_toolbar=None,
               precision=None,
               grid_options=None,
@@ -236,10 +240,17 @@ def show_grid(data_frame,
 
     column_definitions = (column_definitions or {})
 
+    
     # create a visualization for the dataframe
-    return XellgridWidget(df=data_frame, precision=precision,
+    xell = XellgridWidget(df=data_frame, precision=precision,
                           grid_options=grid_options,
                           column_options=column_options,
                           column_definitions=column_definitions,
                           row_edit_callback=row_edit_callback,
                           show_toolbar=show_toolbar)
+    XellgridWidget.tabs[title] = xell
+    tabs = Tab()
+    tabs.children = [widget for widget in XellgridWidget.tabs.values()]
+    for idx, key in enumerate(XellgridWidget.tabs.keys()):
+        tabs.set_title(idx, key)
+    return tabs

@@ -1,8 +1,12 @@
-from xellgrid import XellgridWidget, set_defaults, show_grid, on as xellgrid_on
-from traitlets import All
+import json
+
 import numpy as np
 import pandas as pd
-import json
+from ipywidgets import Tab
+from traitlets import All
+from xellgrid import XellgridWidget
+from xellgrid import on as xellgrid_on
+from xellgrid import set_defaults, show_grid
 
 
 def create_df():
@@ -455,7 +459,7 @@ def test_multi_interval_index():
     show_grid(df)
 
 
-def test_set_defaults():
+def test_set_defaults(reset_tabs):
     fake_grid_options_a = {"foo": "bar"}
     set_defaults(
         show_toolbar=False, precision=4, grid_options=fake_grid_options_a
@@ -467,7 +471,7 @@ def test_set_defaults():
         assert widget.grid_options == fake_grid_options_a
 
     df = create_df()
-    view = show_grid(df)
+    view = show_grid(df).children[0]
     assert_widget_vals_a(view)
 
     view = XellgridWidget(df=df)
@@ -484,7 +488,7 @@ def test_set_defaults():
         assert widget.grid_options == fake_grid_options_b
 
     df = create_df()
-    view = show_grid(df)
+    view = show_grid(df).children[0]
     assert_widget_vals_b(view)
 
     view = XellgridWidget(df=df)
@@ -544,11 +548,11 @@ def test_index_categorical():
     assert not isinstance(grid_data[1]["future_index"], dict)
 
 
-def test_object_dtype_categorical():
+def test_object_dtype_categorical(reset_tabs):
     cat_series = pd.Series(
         pd.Categorical(my_object_vals, categories=my_object_vals)
     )
-    widget = show_grid(cat_series)
+    widget = show_grid(cat_series).children[0]
     constraints_enum = widget._columns[0]["constraints"]["enum"]
     assert not isinstance(constraints_enum[0], dict)
     assert not isinstance(constraints_enum[1], dict)
@@ -678,12 +682,12 @@ def test_change_selection():
     ]
 
 
-def test_instance_created():
+def test_instance_created(reset_tabs):
     event_history = init_event_history(All)
     xellgrid_widget = show_grid(create_df())
 
     assert event_history == [{"name": "instance_created"}]
-    assert xellgrid_widget.id
+    assert isinstance(xellgrid_widget, Tab)
 
 
 def test_add_row():

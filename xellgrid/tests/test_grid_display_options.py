@@ -1,13 +1,13 @@
 import sys
 
 import pandas as pd
-
+from IPython.core.formatters import (DisplayFormatter, FormatterABC,
+                                     PlainTextFormatter)
+from ipywidgets import Tab
 from mock import patch
-from IPython.core.formatters import DisplayFormatter, FormatterABC, PlainTextFormatter
-
+from pytest import raises
 from xellgrid import disable, enable, show_grid
 from xellgrid.grid_display_options import _display_as_xellgrid
-
 
 def test_display_as_xellgrid():
     """
@@ -50,7 +50,8 @@ def test_enable_disable(monkeypatch):
         assert True
 
 
-def test_show_grid():
+def test_show_grid_with_exceptions():
+    """Test show_grid with exceptions"""
     test_df = pd.DataFrame(
         {
             "A": 1.0,
@@ -61,37 +62,35 @@ def test_show_grid():
         })
 
     # test precision type error
-    try:
+    with raises(TypeError):
         precision_str = 'precision'
         show_grid(test_df, precision=precision_str)
-    except TypeError:
-        assert True
-
-    # test column_options,
-
-        test_column_options = {
-            'editable': False
-        }
-
-        test_grid_options = {
-            'maxVisibleRows': 100
-        }
-
-    # test show_grid options
-    grid = show_grid(test_df, column_options=test_column_options, grid_options=test_grid_options)
-    assert grid.column_options['editable'] is False
-    assert grid.grid_options['maxVisibleRows'] == 100
 
     # test grid_option type error
-    try:
+    with raises(TypeError):
         test_grid_options = 'grid_option'
         show_grid(test_df, grid_options=test_grid_options)
-    except TypeError:
-        assert True
 
     # test dataframe type error
-    try:
+    with raises(TypeError):
         test_df = dict["a":"abc"]
         show_grid(test_df)
-    except TypeError:
-        assert True
+
+def test_show_grid_with_column_option(set_test_df, reset_tabs):
+    """test column_options"""
+    test_column_options = {
+        'editable': False
+    }
+
+    test_grid_options = {
+        'maxVisibleRows': 100
+    }
+
+    # test show_grid options
+    
+    tabs = show_grid(set_test_df, title="grid1", column_options=test_column_options, grid_options=test_grid_options)
+    assert isinstance(tabs, Tab)
+    assert tabs.get_title(0) == "grid1"
+    children = tabs.children 
+    assert children[0].column_options['editable'] is False
+    assert children[0].grid_options['maxVisibleRows'] == 100
