@@ -239,7 +239,6 @@ def show_grid(data_frame,
         )
 
     column_definitions = (column_definitions or {})
-
     
     # create a visualization for the dataframe
     xell = XellgridWidget(df=data_frame, precision=precision,
