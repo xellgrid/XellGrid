@@ -429,6 +429,10 @@
   border-left: 1px solid #cccccc;
 }
 
+.xell-grid .filter-button .hidden{
+  visibility: hidden !important;
+}
+
 /* Filter dropdowns */
 
 .xell-grid-container .grid-filter {

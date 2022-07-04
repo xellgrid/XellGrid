@@ -740,6 +740,18 @@ export class XellgridView extends widgets.DOMWidgetView {
             this.send({'type': "add_row"})
           }
         },
+        {
+          command: "toggle_filter", title: "Filter", iconImage: "", cssClass: "", textCssClass: "",
+          action: (e: any, args: any) => {
+            $('.filter-button').each(function(){
+              if ($(this).hasClass('hidden')){
+                $(this).removeClass('hidden')
+              } else {
+                $(this).addClass('hidden')
+              }
+            })
+          }
+        },
         // { divider: true },
         // {
         //   command: "help", title: "Help", iconCssClass: "icon-help"

@@ -7,7 +7,7 @@ class DefaultSettings(object):
         self._grid_options = {
             'fullWidthRows': True,
             'syncColumnCellResize': True,
-            'forceFitColumns': True,
+            'forceFitColumns': False,
             'defaultColumnWidth': 150,
             'rowHeight': 28,
             'enableColumnReorder': False,
