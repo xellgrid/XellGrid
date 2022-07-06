@@ -1,7 +1,7 @@
 """Global test fixtures."""
 import pandas as pd
 from pytest import fixture
-from xellgrid import XellgridWidget
+from xellgrid.xell_tabs import XellTabs
 
 @fixture
 def set_test_df():
@@ -19,7 +19,7 @@ def set_test_df():
 
 @fixture
 def reset_tabs():
-    XellgridWidget.tabs = {}
+    XellTabs.clear()
     yield
-    XellgridWidget.tabs = {}
+    XellTabs.clear()
 

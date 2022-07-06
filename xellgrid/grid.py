@@ -117,7 +117,6 @@ class XellgridWidget(widgets.DOMWidget):
     show_toolbar = Bool(False, sync=True)
     id = Unicode(sync=True)
 
-    tabs = {}
     
     def __init__(self, *args, **kwargs):
         self.id = str(uuid4())
@@ -134,10 +133,6 @@ class XellgridWidget(widgets.DOMWidget):
 
         if self.df is not None:
             self._update_df()
-
-    @classmethod
-    def add_tab(cls, title, **kwargs):
-        cls.tabs[title] = cls(df=get_default_df())
 
     def _grid_options_default(self):
         return defaults.grid_options
