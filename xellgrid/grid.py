@@ -1,20 +1,30 @@
+import ipywidgets as widgets
+import pandas as pd
+import numpy as np
 import json
 import warnings
+
 from types import FunctionType
+from traitlets import (
+    Unicode,
+    Instance,
+    Bool,
+    Integer,
+    Dict,
+    List,
+    Tuple,
+    Any
+)
+
 from uuid import uuid4
 
-import ipywidgets as widgets
-import numpy as np
-import pandas as pd
-from traitlets import Any, Bool, Dict, Instance, Integer, List, Tuple, Unicode
-
-from xellgrid.grid_row_operations.add_rows import (
-    spreadsheet_duplicate_last_row, spreadsheet_insert_rows)
-
 from .common.dataframe_utils import zero_out_dataframe
-from .grid_default_settings import defaults, get_default_df
+from .grid_default_settings import defaults
 from .grid_event_handlers import EventHandlers, handlers
 from .grid_utils import stringify
+
+from xellgrid.grid_row_operations.add_rows import spreadsheet_insert_rows, spreadsheet_duplicate_last_row
+
 # versions of pandas prior to version 0.20.0 don't support the orient='table'
 # when calling the 'to_json' function on DataFrames.  to get around this we
 # have our own copy of the panda's 0.20.0 implementation that we use for old
@@ -27,6 +37,7 @@ from .grid_utils import stringify
 
 
 PAGE_SIZE = 100
+
 
 @widgets.register()
 class XellgridWidget(widgets.DOMWidget):
@@ -117,7 +128,6 @@ class XellgridWidget(widgets.DOMWidget):
     show_toolbar = Bool(False, sync=True)
     id = Unicode(sync=True)
 
-    
     def __init__(self, *args, **kwargs):
         self.id = str(uuid4())
         self._initialized = False
@@ -1071,6 +1081,7 @@ class XellgridWidget(widgets.DOMWidget):
                 'name': 'filter_changed',
                 'column': content['field']
             })
+
     def _notify_listeners(self, event):
         # notify listeners at the module level
         handlers.notify_listeners(event, self)
