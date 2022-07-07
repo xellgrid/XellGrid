@@ -1,5 +1,5 @@
 import pandas as pd
-
+import numpy as np
 
 class DefaultSettings(object):
 
@@ -7,7 +7,7 @@ class DefaultSettings(object):
         self._grid_options = {
             'fullWidthRows': True,
             'syncColumnCellResize': True,
-            'forceFitColumns': True,
+            'forceFitColumns': False,
             'defaultColumnWidth': 150,
             'rowHeight': 28,
             'enableColumnReorder': False,
@@ -121,5 +121,7 @@ def set_grid_option(optname, optvalue):
     """
     defaults.grid_options[optname] = optvalue
 
+def get_default_df():
+    return pd.DataFrame("", columns=[ char for char in "ABCDEFGHIJKLMNOPQRSTUVWXYZ"], index=[num for num in range(10_000)])
 
 defaults = DefaultSettings()

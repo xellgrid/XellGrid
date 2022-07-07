@@ -1,12 +1,15 @@
 import sys
 
 import pandas as pd
-
+from IPython.core.formatters import (DisplayFormatter, FormatterABC,
+                                     PlainTextFormatter)
+from ipywidgets import Text
 from mock import patch
-from IPython.core.formatters import DisplayFormatter, FormatterABC, PlainTextFormatter
-
+from pytest import raises
 from xellgrid import disable, enable, show_grid
-from xellgrid.grid_display_options import _display_as_xellgrid
+from xellgrid.grid import XellgridWidget
+from xellgrid.grid_display_options import _display_as_xellgrid, add_tab
+from xellgrid.xell_tabs import XellTabs
 
 
 def test_display_as_xellgrid():
@@ -61,21 +64,19 @@ def test_show_grid():
         })
 
     # test precision type error
-    try:
+    with raises(TypeError):
         precision_str = 'precision'
         show_grid(test_df, precision=precision_str)
-    except TypeError:
-        assert True
 
     # test column_options,
 
-        test_column_options = {
-            'editable': False
-        }
+    test_column_options = {
+        'editable': False
+    }
 
-        test_grid_options = {
-            'maxVisibleRows': 100
-        }
+    test_grid_options = {
+        'maxVisibleRows': 100
+    }
 
     # test show_grid options
     grid = show_grid(test_df, column_options=test_column_options, grid_options=test_grid_options)
@@ -83,15 +84,32 @@ def test_show_grid():
     assert grid.grid_options['maxVisibleRows'] == 100
 
     # test grid_option type error
-    try:
+    with raises(TypeError):
         test_grid_options = 'grid_option'
         show_grid(test_df, grid_options=test_grid_options)
-    except TypeError:
-        assert True
 
     # test dataframe type error
-    try:
+    with raises(TypeError):
         test_df = dict["a":"abc"]
         show_grid(test_df)
-    except TypeError:
-        assert True
+
+
+def test_add_tab_with_ipywidget(reset_tabs):
+    """Test add tab with ipywidget"""
+    add_tab("text", Text())
+    text = XellTabs.get_widget('text')
+    assert isinstance(text, Text)
+    tabs = XellTabs.get_tabs()
+    assert text in tabs.children
+
+
+def test_add_tab_with_xell_widget(reset_tabs):
+    """Test add tab with XellWidget"""
+    test_column_options = {
+        'editable': False
+    }
+    add_tab("default_df",  test_column_options)
+    default_df = XellTabs.get_widget('default_df')
+    assert isinstance(default_df, XellgridWidget)
+    tabs = XellTabs.get_tabs()
+    assert default_df in tabs.children

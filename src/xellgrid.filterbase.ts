@@ -44,7 +44,7 @@ export class FilterBase {
     this.column_header_elem = column_header_elem;
     this.slick_grid = slick_grid;
     this.filter_btn = $(`
-      <div class='filter-button'>
+      <div class='filter-button hidden'>
         <div class='fa fa-filter filter-icon'/>
       </div>
     `);
