@@ -1,6 +1,7 @@
 """Global test fixtures."""
 import pandas as pd
 from pytest import fixture
+from xellgrid.xell_tabs import XellTabs
 
 @fixture
 def set_test_df():
@@ -14,3 +15,11 @@ def set_test_df():
         "D": [1, "bar", "buzz", "fox"]
     })
     return test_df
+
+
+@fixture
+def reset_tabs():
+    XellTabs.clear()
+    yield
+    XellTabs.clear()
+

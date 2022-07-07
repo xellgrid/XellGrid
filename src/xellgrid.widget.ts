@@ -741,6 +741,12 @@ export class XellgridView extends widgets.DOMWidgetView {
           }
         },
         {
+          command: "add_new_tab", title: "Add New Tab", iconImage: "", cssClass: "", textCssClass: "",
+          action: (e: any, args: any) => {
+            this.send({'type': "add_new_tab"})
+          }
+        }，
+        {
           command: "toggle_filter", title: "Filter", iconImage: "", cssClass: "", textCssClass: "",
           action: (e: any, args: any) => {
             $('.filter-button').each(function(){

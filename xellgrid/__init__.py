@@ -22,9 +22,11 @@ from .grid_event_handlers import (
 )
 
 from .grid_display_options import (
+    add_tab,
     enable,
     disable,
-    show_grid,
+    get_widget,
+    show_grid
 )
 
 
@@ -50,8 +52,10 @@ def _jupyter_labextension_paths():
     }]
 
 __all__ = [
+    "add_tab",
     "enable",
     "disable",
+    "get_widget",
     "set_defaults",
     "on",
     "off",
