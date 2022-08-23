@@ -1,9 +1,11 @@
+import uuid
 import ipywidgets as widgets
 import pandas as pd
 import numpy as np
 import json
 import warnings
 
+from ipywidgets import Tab
 from types import FunctionType
 from traitlets import (
     Unicode,
@@ -17,6 +19,8 @@ from traitlets import (
 )
 
 from uuid import uuid4
+
+from xellgrid.xell_tabs import XellTabs
 
 from .common.dataframe_utils import zero_out_dataframe
 from .grid_default_settings import defaults
@@ -77,7 +81,8 @@ class XellgridWidget(widgets.DOMWidget):
     column_definitions : bool
         Get/set the column definitions (column-specific options)
         being used by the current instance.
-
+    tabs : dict
+        Get/Set titles for each df, values is the id of the instance of df
     """
 
     _view_name = Unicode('XellgridView').tag(sync=True)
@@ -88,7 +93,7 @@ class XellgridWidget(widgets.DOMWidget):
     _model_module_version = Unicode('^1.1.3').tag(sync=True)
 
     _df = Instance(pd.DataFrame)
-    _df_json = Unicode('', sync=True)
+    _df_json = List([], sync=True)
     _primary_key = List()
     _primary_key_display = Dict({})
     _row_styles = Dict({}, sync=True)
@@ -326,7 +331,7 @@ class XellgridWidget(widgets.DOMWidget):
         self._ignore_df_changed = True
         # make a copy of the user's dataframe
         self._df = self.df.copy()
-
+        
         # insert a column which we'll use later to map edits from
         # a filtered version of this df back to the unfiltered version
         self._df.insert(0, self._index_col_name, range(0, len(self._df)))
@@ -337,7 +342,7 @@ class XellgridWidget(widgets.DOMWidget):
 
         self._update_table(update_columns=True, fire_data_change_event=False)
         self._ignore_df_changed = False
-
+        
     def _rebuild_widget(self):
         self._update_df()
         self.send({'type': 'draw_table'})
@@ -561,8 +566,7 @@ class XellgridWidget(widgets.DOMWidget):
                                       date_format='iso',
                                       double_precision=self.precision)
 
-        self._df_json = df_json
-
+        self._df_json = [df_json]*5
         if self.row_edit_callback is not None:
             editable_rows = {}
             for index, row in df.iterrows():

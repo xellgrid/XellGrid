@@ -7,9 +7,7 @@ import slider_filter = require('./xellgrid.sliderfilter');
 import text_filter = require('./xellgrid.textfilter');
 import boolean_filter = require('./xellgrid.booleanfilter');
 import editors = require('./xellgrid.editors');
-
-import 'jqueryui';
-
+import 'jqueryui'
 import 'slickgrid/slick.core';
 import 'slickgrid/lib/jquery.event.drag-2.3.0'
 import 'slickgrid/plugins/slick.rowselectionmodel'
@@ -22,9 +20,12 @@ import 'slickgrid/slick.editors'
 import 'style-loader!slickgrid/slick.grid.css'
 import 'style-loader!slickgrid/slick-default-theme.css'
 import 'style-loader!jquery-ui-dist/jquery-ui.min.css'
+import 'style-loader!jquery-ui/themes/base/tabs.css'
 import './xellgrid.css'
 import './menu.css'
+import xell_slick_grid = require('./xellgrid.slickgrid')
 
+// import { random } from 'underscore';
 declare global {
   interface Window {
     $: any,
@@ -223,12 +224,11 @@ export class XellgridModel extends widgets.DOMWidgetModel {
       _view_module : 'xellgrid',
       _model_module_version : '^1.1.3',
       _view_module_version : '^1.1.3',
-      _df_json: '',
+      _df_json: [],
       _columns: {}
     });
   }
 }
-
 
 // View for the xellgrid widget
 export class XellgridView extends widgets.DOMWidgetView {
@@ -273,37 +273,80 @@ export class XellgridView extends widgets.DOMWidgetView {
 	public multi_index: any;
 	public in_progress_btn: any;
   public main_menu: any;
+  public tab: any;
+  public tabs: any;
+  public tab_wrapper: any;
+  public init_df: any;
+  public ul: any;
+  public li: any;
   render() {
     // subscribe to incoming messages from the QGridWidget
     this.model.on('msg:custom', this.handle_msg, this);
-    this.initialize_qgrid();
+    this.initialize_xellgrid();
+    var that = this;
+    $(document).ready(function(){
+      that.tabs.tabs()
+      let module_array = that.model.get('_df_json');
+      module_array.slice(1).forEach((element: any) => {
+        xell_slick_grid.create_new_grid(that.model, that, element);
+      });
+      that.tabs.tabs("refresh")
+    })
+    
   }
 
   /**
    * Main entry point for drawing the widget,
    * including toolbar buttons if necessary.
    */
-  initialize_qgrid() {
+  initialize_xellgrid() {
     this.$el.empty();
     if (!this.$el.hasClass('xell-grid-container')){
       this.$el.addClass('xell-grid-container');
     }
+    this.tab = $(`<div id="Grid1" class="ui-widget"></div>`)
+    this.tab_wrapper = $(`
+      <div id="tabs-1" class="ui-tabs-panel ui-corner-bottom ui-widget-content"></div>`
+    )
+    this.tabs = $(`
+      <div id="xellgrid-tabs" class="ui-tabs ui-corner-all ui-widget ui-widget-content">
+          
+      </div>
+    `)
+    this.ul = $(`
+          <ul id="xell-grid-ul" class="ui-tabs-nav ui-corner-all ui-helper-reset ui-helper-clearfix ui-widget-header">
+          </ul>`
+    ).appendTo(this.tabs)
+    
+    this.li = $(`
+      <li class="ui-tabs-tab ui-corner-top ui-state-default ui-tab">
+            <a href="#tabs-1" class="ui-tabs-anchor">Grid 1</a></li>
+    `).appendTo(this.ul)
+
+    this.tab.appendTo(this.tab_wrapper)
     this.initialize_toolbar();
     this.initialize_slick_grid();
+    this.tab_wrapper.appendTo(this.tabs)
+    this.tabs.appendTo(this.$el)
+    
+    // let module_array = this.model.get('_df_json');
+    // module_array.slice(1).forEach((element: any) => {
+    //   xell_slick_grid.create_new_grid(this.model, this, element);
+    // });
   }
 
   initialize_toolbar() {
     if (!this.model.get('show_toolbar')){
-      this.$el.removeClass('show-toolbar');
+      this.tab.removeClass('show-toolbar');
     } else {
-      this.$el.addClass('show-toolbar');
+      this.tab.addClass('show-toolbar');
     }
 
     if (this.toolbar){
       return;
     }
 
-    this.toolbar = $("<div class='xell-grid-toolbar'>").appendTo(this.$el);
+    this.toolbar = $("<div class='xell-grid-toolbar'>").appendTo(this.tab);
 
     this.window_dropdown_menu = $(`
     <div id="menu-bar" > 
@@ -412,11 +455,12 @@ export class XellgridView extends widgets.DOMWidgetView {
   initialize_slick_grid() {
 
     if (!this.grid_elem) {
-      this.grid_elem = $("<div class='xell-grid'>").appendTo(this.$el);
+      this.grid_elem = $("<div class='xell-grid'>").appendTo(this.tab);
     }
-
-    // create the table
-    var df_json = JSON.parse(this.model.get('_df_json'));
+    
+    var df_json = JSON.parse(this.model.get('_df_json')[0]);
+    
+    this.init_df = df_json;
     var columns = this.model.get('_columns');
     this.data_view = this.create_data_view(df_json.data);
     this.grid_options = this.model.get('grid_options');
@@ -743,9 +787,10 @@ export class XellgridView extends widgets.DOMWidgetView {
         {
           command: "add_new_tab", title: "Add New Tab", iconImage: "", cssClass: "", textCssClass: "",
           action: (e: any, args: any) => {
-            this.send({'type': "add_new_tab"})
+            // xell_slick_grid.create_new_grid(this.model, this);
+            // this.send({'type': "add_new_tab"})
           }
-        }，
+        }, 
         {
           command: "toggle_filter", title: "Filter", iconImage: "", cssClass: "", textCssClass: "",
           action: (e: any, args: any) => {
@@ -888,6 +933,7 @@ export class XellgridView extends widgets.DOMWidgetView {
         }, 1);
       });
     }, 1);
+
   }
 
   processPhosphorMessage(msg: any) {
@@ -989,6 +1035,8 @@ export class XellgridView extends widgets.DOMWidgetView {
    * Handle messages from the QGridWidget.
    */
   handle_msg(msg: any) {
+    console.log(msg);
+    
     if (msg.type === 'draw_table') {
       this.initialize_slick_grid();
     } else if (msg.type == 'show_error') {
@@ -1014,8 +1062,8 @@ export class XellgridView extends widgets.DOMWidgetView {
         var df_json = JSON.parse(this.model.get('_df_json'));
         this.row_styles = this.model.get("_row_styles");
         this.multi_index = this.model.get("_multi_index");
-        var data_view = this.create_data_view(df_json.data);
-
+        var data_view = this.create_data_view(df_json.data);;
+        
         if (msg.triggered_by === 'change_viewport') {
           if (this.next_viewport_msg) {
             this.send(this.next_viewport_msg);
@@ -1144,8 +1192,3 @@ export class XellgridView extends widgets.DOMWidgetView {
     this.slick_grid.resizeCanvas();
   }
 }
-
-// module.exports = {
-//   XellgridModel : XellgridModel,
-//   XellgridView : XellgridView
-// };
