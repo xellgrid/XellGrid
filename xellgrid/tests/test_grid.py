@@ -4,6 +4,8 @@ import numpy as np
 import pandas as pd
 import json
 
+from xellgrid.grid import update_table
+
 
 def create_df():
     return pd.DataFrame(
@@ -130,7 +132,7 @@ def check_edit_success(
     assert widget._df[col_name][row_index] == new_val_obj
 
     # call _update_table so the widget updates _df_json
-    widget._update_table(fire_data_change_event=False)
+    update_table(widget, fire_data_change_event=False)
     grid_data = json.loads(widget._df_json)["data"]
     assert grid_data[row_index][str(col_name)] == new_val_json
 
