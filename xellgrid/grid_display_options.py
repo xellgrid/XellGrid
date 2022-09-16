@@ -63,7 +63,8 @@ def show_grid(data_frame,
               column_options=None,
               column_definitions=None,
               row_edit_callback=None,
-              grid_defaults=None):
+              grid_defaults=None,
+              rendering_size=15):
 
     """
     Renders a DataFrame or Series as an interactive XellGrid, represented by
@@ -243,7 +244,20 @@ def show_grid(data_frame,
     column_definitions = (column_definitions or {})
     
     # create a visualization for the dataframe
-    return XellgridWidget(df=data_frame, precision=precision,
+    _max_index = max(data_frame.index)
+    total_rows = data_frame.shape[0]
+    render_df = data_frame
+    core_df = data_frame
+    # render_df is the dataframe used for rendering purpose
+    # 09/11/2022 note:
+    # render_df is a transitory solution and it should be merged to the new data structure xellgrid
+    # core_df is also a transitory solution
+    if total_rows > rendering_size:
+        render_df = pd.concat([data_frame[:rendering_size], data_frame[total_rows - rendering_size:]], ignore_index=True)
+
+    return XellgridWidget(core_df,
+                          df=render_df,
+                          precision=precision,
                           grid_options=grid_options,
                           column_options=column_options,
                           column_definitions=column_definitions,

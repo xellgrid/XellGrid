@@ -1,6 +1,9 @@
 import ipywidgets as widgets
+import logging
 import pandas as pd
+
 import numpy as np
+import time
 import json
 import warnings
 
@@ -37,6 +40,8 @@ from xellgrid.grid_row_operations.add_rows import spreadsheet_insert_rows, sprea
 
 
 PAGE_SIZE = 100
+LOGGER = logging.getLogger()
+LOGGER.setLevel(logging.DEBUG)
 
 
 @widgets.register()
@@ -95,31 +100,42 @@ class XellgridWidget(widgets.DOMWidget):
     _disable_grouping = Bool(False)
     _columns = Dict({}, sync=True)
     _editable_rows = Dict({}, sync=True)
+
     _filter_tables = Dict({})
+
     _sorted_column_cache = Dict({})
     _interval_columns = List([], sync=True)
     _period_columns = List([])
     _string_columns = List([])
     _sort_helper_columns = Dict({})
+
     _initialized = Bool(False)
     _ignore_df_changed = Bool(False)
+
     _unfiltered_df = Instance(pd.DataFrame)
+
     _index_col_name = Unicode('xellgrid_unfiltered_index', sync=True)
     _sort_col_suffix = Unicode('_xellgrid_sort_column')
+
     _multi_index = Bool(False, sync=True)
     _edited = Bool(False)
     _selected_rows = List([])
+
     _viewport_range = Tuple(Integer(),
                             Integer(),
                             default_value=(0, 100),
                             sync=True)
+
     _df_range = Tuple(Integer(), Integer(), default_value=(0, 100), sync=True)
+
     _row_count = Integer(0, sync=True)
     _sort_field = Any(None, sync=True)
     _sort_ascending = Bool(True, sync=True)
     _handlers = Instance(EventHandlers)
 
+    # part of user input dataframe and df is used for rendering
     df = Instance(pd.DataFrame)
+
     precision = Integer(6, sync=True)
     grid_options = Dict(sync=True)
     column_options = Dict({})
@@ -128,10 +144,19 @@ class XellgridWidget(widgets.DOMWidget):
     show_toolbar = Bool(False, sync=True)
     id = Unicode(sync=True)
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, core_df=None, *args, **kwargs):
+
+        start_time_init = time.time()
+        self._core_df = core_df
         self.id = str(uuid4())
         self._initialized = False
+
+        # performance monitor
+        start_time_constructor = time.time()
         super().__init__(*args, **kwargs)
+        end_time_constructor = time.time()
+        logging.debug("constructor took: %s seconds", end_time_constructor - start_time_constructor)
+
         # register a callback for custom messages
         self.on_msg(self._handle_xellgrid_msg)
         self._initialized = True
@@ -141,8 +166,14 @@ class XellgridWidget(widgets.DOMWidget):
             'name': 'instance_created'
         }, self)
 
+        start_time_update_render_df = time.time()
         if self.df is not None:
-            self._update_df()
+            self._update_render_df()
+        end_time_update_render_df = time.time()
+        logging.debug("update df took: %s seconds", end_time_update_render_df - start_time_update_render_df)
+
+        end_time_init = time.time()
+        logging.debug("Xell grid initiation took: %s seconds", end_time_init - start_time_init)
 
     def _grid_options_default(self):
         return defaults.grid_options
@@ -322,8 +353,9 @@ class XellgridWidget(widgets.DOMWidget):
         """
         self._handlers.off(names, handler)
 
-    def _update_df(self):
+    def _update_render_df(self):
         self._ignore_df_changed = True
+
         # make a copy of the user's dataframe
         self._df = self.df.copy()
 
@@ -333,13 +365,15 @@ class XellgridWidget(widgets.DOMWidget):
 
         # keep an unfiltered version to serve as the starting point
         # for filters, and the state we return to when filters are removed
+        # TODO - this is very costly for a large DF, consider just save the original index order
+
         self._unfiltered_df = self._df.copy()
 
-        self._update_table(update_columns=True, fire_data_change_event=False)
+        update_table(self, update_columns=True, fire_data_change_event=False)
         self._ignore_df_changed = False
 
     def _rebuild_widget(self):
-        self._update_df()
+        self._update_render_df()
         self.send({'type': 'draw_table'})
 
     def _df_changed(self):
@@ -363,227 +397,7 @@ class XellgridWidget(widgets.DOMWidget):
             return
         self.send({'type': 'change_show_toolbar'})
 
-    def _update_table(self, update_columns=False, triggered_by=None, scroll_to_row=None, fire_data_change_event=True):
-        df = self._df.copy()
 
-        from_index = max(self._viewport_range[0] - PAGE_SIZE, 0)
-        to_index = max(self._viewport_range[0] + PAGE_SIZE, 0)
-        new_df_range = (from_index, to_index)
-
-        #TODO register all events to an event enum
-
-        if triggered_by == 'viewport_changed' and \
-                self._df_range == new_df_range:
-            return
-
-        self._df_range = new_df_range
-
-        df = df.iloc[from_index:to_index]
-
-        self._row_count = len(self._df.index)
-
-        if update_columns:
-            self._string_columns = list(df.select_dtypes(
-                include=[np.dtype('O'), 'category']
-            ).columns.values)
-
-            def should_be_stringified(col_series):
-                return col_series.dtype == np.dtype('O') or \
-                       hasattr(col_series, 'cat') or \
-                       isinstance(col_series, pd.PeriodIndex)
-
-            if type(df.index) == pd.MultiIndex:
-                self._multi_index = True
-                for idx, cur_level in enumerate(df.index.levels):
-                    if cur_level.name:
-                        col_name = cur_level.name
-                        self._primary_key_display[col_name] = col_name
-                    else:
-                        col_name = 'level_%s' % idx
-                        self._primary_key_display[col_name] = ""
-                    self._primary_key.append(col_name)
-                    if should_be_stringified(cur_level):
-                        self._string_columns.append(col_name)
-            else:
-                self._multi_index = False
-                if df.index.name:
-                    col_name = df.index.name
-                    self._primary_key_display[col_name] = col_name
-                else:
-                    col_name = 'index'
-                    self._primary_key_display[col_name] = ""
-                self._primary_key = [col_name]
-
-                if should_be_stringified(df.index):
-                    self._string_columns.append(col_name)
-
-        # call map(str) for all columns identified as string columns, in
-        # case any are not strings already
-        for col_name in self._string_columns:
-            sort_column_name = self._sort_helper_columns.get(col_name)
-            if sort_column_name:
-                series_to_set = df[sort_column_name]
-            else:
-                series_to_set = self._get_col_series_from_df(
-                    col_name, df, level_vals=True
-                ).map(stringify)
-            self._set_col_series_on_df(col_name, df, series_to_set)
-
-        if type(df.index) == pd.MultiIndex and not self._disable_grouping:
-            previous_value = None
-            row_styles = {}
-            row_loc = from_index
-            for index, row in df.iterrows():
-                row_style = {}
-                last_row = row_loc == (len(self._df) - 1)
-                prev_idx = row_loc - 1
-                for idx, index_val in enumerate(index):
-                    col_name = self._primary_key[idx]
-                    if previous_value is None:
-                        row_style[col_name] = 'group-top'
-                        continue
-                    elif index_val == previous_value[idx]:
-                        if prev_idx < 0:
-                            row_style[col_name] = 'group-top'
-                            continue
-                        if row_styles[prev_idx][col_name] == 'group-top':
-                            row_style[col_name] = 'group-middle'
-                        elif row_styles[prev_idx][col_name] == 'group-bottom':
-                            row_style[col_name] = 'group-top'
-                        else:
-                            row_style[col_name] = 'group-middle'
-                    else:
-                        if last_row:
-                            row_style[col_name] = 'single'
-                        else:
-                            row_style[col_name] = 'group-top'
-                        if prev_idx >= 0:
-                            if row_styles[prev_idx][col_name] == \
-                                    'group-middle':
-                                row_styles[prev_idx][col_name] = 'group-bottom'
-                            elif row_styles[prev_idx][col_name] == \
-                                    'group-top':
-                                row_styles[prev_idx][col_name] = 'group-single'
-                previous_value = index
-                row_styles[row_loc] = row_style
-                row_loc += 1
-
-            self._row_styles = row_styles
-        else:
-            self._row_styles = {}
-
-        with warnings.catch_warnings():
-            warnings.simplefilter("ignore", category=UserWarning)
-            df_json = df.to_json(
-                None, orient="table", date_format="iso", double_precision=self.precision
-            )
-
-        if update_columns:
-            self._interval_columns = []
-            self._sort_helper_columns = {}
-            self._period_columns = []
-
-            # parse the schema that we just exported in order to get the
-            # column metadata that was generated by 'to_json'
-            parsed_json = json.loads(df_json)
-            df_schema = parsed_json['schema']
-
-            columns = {}
-            for i, cur_column in enumerate(df_schema['fields']):
-                col_name = cur_column['name']
-                if 'constraints' in cur_column and \
-                        isinstance(cur_column['constraints']['enum'][0], dict):
-                    cur_column['type'] = 'interval'
-                    self._interval_columns.append(col_name)
-
-                if 'freq' in cur_column and cur_column['type'] == 'periodindex':
-                    self._period_columns.append(col_name)
-
-                if col_name in self._primary_key:
-                    cur_column['is_index'] = True
-                    cur_column['index_display_text'] = \
-                        self._primary_key_display[col_name]
-                    if len(self._primary_key) > 0:
-                        cur_column['level'] = self._primary_key.index(col_name)
-                    level = self._primary_key.index(col_name)
-                    if level == 0:
-                        cur_column['first_index'] = True
-                    if self._multi_index and \
-                            level == (len(self._primary_key) - 1):
-                        cur_column['last_index'] = True
-
-                cur_column['position'] = i
-                cur_column['field'] = col_name
-                cur_column['id'] = col_name
-                cur_column['cssClass'] = cur_column['type']
-
-                columns[col_name] = cur_column
-
-                columns[col_name].update(self.column_options)
-                if col_name in self.column_definitions.keys():
-                    columns[col_name].update(self.column_definitions[col_name])
-
-            self._columns = columns
-
-        # special handling for interval columns: convert to a string column
-        # and then call 'to_json' again to get a new version of the table
-        # json that has interval columns replaced with text columns
-        if len(self._interval_columns) > 0:
-            for col_name in self._interval_columns:
-                col_series = self._get_col_series_from_df(col_name,
-                                                          df,
-                                                          level_vals=True)
-                col_series_as_strings = col_series.map(lambda x: str(x))
-                self._set_col_series_on_df(col_name, df,
-                                           col_series_as_strings)
-
-        # special handling for period index columns: call to_timestamp to
-        # convert the series to a datetime series before displaying
-        if len(self._period_columns) > 0:
-            for col_name in self._period_columns:
-                sort_column_name = self._sort_helper_columns.get(col_name)
-                if sort_column_name:
-                    series_to_set = df[sort_column_name]
-                else:
-                    temp = self._get_col_series_from_df(
-                        col_name, df, level_vals=True
-                    )
-                    series_to_set = self._get_col_series_from_df(
-                        col_name, df, level_vals=True
-                    ).to_timestamp()
-                self._set_col_series_on_df(col_name, df, series_to_set)
-
-        # and then call 'to_json' again to get a new version of the table
-        # json that has interval columns replaced with text columns
-        if len(self._interval_columns) > 0 or len(self._period_columns) > 0:
-            df_json = pd_json.to_json(None, df,
-                                      orient='table',
-                                      date_format='iso',
-                                      double_precision=self.precision)
-
-        self._df_json = df_json
-
-        if self.row_edit_callback is not None:
-            editable_rows = {}
-            for index, row in df.iterrows():
-                editable_rows[int(row[self._index_col_name])] = \
-                    self.row_edit_callback(row)
-            self._editable_rows = editable_rows
-
-        if fire_data_change_event:
-            self._notify_listeners({
-                'name': 'json_updated',
-                'triggered_by': triggered_by,
-                'range': self._df_range
-            })
-            data_to_send = {
-                'type': 'update_data_view',
-                'columns': self._columns,
-                'triggered_by': triggered_by
-            }
-            if scroll_to_row:
-                data_to_send['scroll_to_row'] = scroll_to_row
-            self.send(data_to_send)
 
     def _update_sort(self):
         try:
@@ -932,7 +746,7 @@ class XellgridWidget(widgets.DOMWidget):
 
         self._sorted_column_cache = {}
         self._update_sort()
-        self._update_table(triggered_by='change_filter')
+        update_table(self, triggered_by='change_filter')
         self._ignore_df_changed = False
 
     def _handle_xellgrid_msg(self, widget, content, buffers=None):
@@ -996,7 +810,7 @@ class XellgridWidget(widgets.DOMWidget):
             if old_viewport_range == self._viewport_range:
                 return
 
-            self._update_table(triggered_by='change_viewport')
+            update_table(self, triggered_by='change_viewport')
             self._notify_listeners({
                 'name': 'viewport_changed',
                 'old': old_viewport_range,
@@ -1057,7 +871,7 @@ class XellgridWidget(widgets.DOMWidget):
             self._sort_ascending = content['sort_ascending']
             self._sorted_column_cache = {}
             self._update_sort()
-            self._update_table(triggered_by='change_sort')
+            update_table(self, triggered_by='change_sort')
             self._notify_listeners({
                 'name': 'sort_changed',
                 'old': {
@@ -1161,7 +975,7 @@ class XellgridWidget(widgets.DOMWidget):
 
         # the duplicate record will be concatenated to the unfiltered_df
         self._unfiltered_df = spreadsheet_insert_rows(self._unfiltered_df, self._df.iloc[[max_index]], max_index + 1)
-        self._update_table(triggered_by='add_row',
+        update_table(self, triggered_by='add_row',
                            scroll_to_row=self._df.index.get_loc(max_index))
         return max_index + 1
 
@@ -1177,7 +991,7 @@ class XellgridWidget(widgets.DOMWidget):
         self._df = spreadsheet_insert_rows(self._df, new_row, row_index + 1)
         self._unfiltered_df = spreadsheet_insert_rows(self._unfiltered_df, new_row, row_index + 1)
         
-        self._update_table(triggered_by='add_empty_row',
+        update_table(self, triggered_by='add_empty_row',
                            scroll_to_row=self._df.index.get_loc(row_index))
 
     def _add_row(self, row):
@@ -1213,7 +1027,7 @@ class XellgridWidget(widgets.DOMWidget):
             df.loc[index_col_val, col_names[i]] = s
             self._unfiltered_df.loc[index_col_val, col_names[i]] = s
 
-        self._update_table(triggered_by='add_row',
+        update_table(self, triggered_by='add_row',
                            scroll_to_row=df.index.get_loc(index_col_val),
                            fire_data_change_event=True)
 
@@ -1237,7 +1051,7 @@ class XellgridWidget(widgets.DOMWidget):
         old_value = self._df.loc[index, column]
         self._df.loc[index, column] = value
         self._unfiltered_df.loc[index, column] = value
-        self._update_table(triggered_by='edit_cell',
+        update_table(self, triggered_by='edit_cell',
                            fire_data_change_event=True)
 
         self._notify_listeners({
@@ -1296,7 +1110,7 @@ class XellgridWidget(widgets.DOMWidget):
         self._df.drop(selected_names, inplace=True)
         self._unfiltered_df.drop(selected_names, inplace=True)
         self._selected_rows = []
-        self._update_table(triggered_by='remove_row')
+        update_table(self, triggered_by='remove_row')
         return selected_names
 
     def change_selection(self, rows=[]):
@@ -1367,6 +1181,229 @@ class XellgridWidget(widgets.DOMWidget):
             'option_name': option_name,
             'option_value': option_value
         })
+
+
+def update_table(self, update_columns=False, triggered_by=None, scroll_to_row=None, fire_data_change_event=True):
+    df = self._df.copy()
+
+    from_index = max(self._viewport_range[0] - PAGE_SIZE, 0)
+    to_index = max(self._viewport_range[0] + PAGE_SIZE, 0)
+    new_df_range = (from_index, to_index)
+
+    #TODO register all events to an event enum
+
+    if triggered_by == 'viewport_changed' and \
+            self._df_range == new_df_range:
+        return
+
+    self._df_range = new_df_range
+
+    df = df.iloc[from_index:to_index]
+
+    self._row_count = len(self._df.index)
+
+    if update_columns:
+        self._string_columns = list(df.select_dtypes(
+            include=[np.dtype('O'), 'category']
+        ).columns.values)
+
+        def should_be_stringified(col_series):
+            return col_series.dtype == np.dtype('O') or \
+                   hasattr(col_series, 'cat') or \
+                   isinstance(col_series, pd.PeriodIndex)
+
+        if type(df.index) == pd.MultiIndex:
+            self._multi_index = True
+            for idx, cur_level in enumerate(df.index.levels):
+                if cur_level.name:
+                    col_name = cur_level.name
+                    self._primary_key_display[col_name] = col_name
+                else:
+                    col_name = 'level_%s' % idx
+                    self._primary_key_display[col_name] = ""
+                self._primary_key.append(col_name)
+                if should_be_stringified(cur_level):
+                    self._string_columns.append(col_name)
+        else:
+            self._multi_index = False
+            if df.index.name:
+                col_name = df.index.name
+                self._primary_key_display[col_name] = col_name
+            else:
+                col_name = 'index'
+                self._primary_key_display[col_name] = ""
+            self._primary_key = [col_name]
+
+            if should_be_stringified(df.index):
+                self._string_columns.append(col_name)
+
+    # call map(str) for all columns identified as string columns, in
+    # case any are not strings already
+    for col_name in self._string_columns:
+        sort_column_name = self._sort_helper_columns.get(col_name)
+        if sort_column_name:
+            series_to_set = df[sort_column_name]
+        else:
+            series_to_set = self._get_col_series_from_df(
+                col_name, df, level_vals=True
+            ).map(stringify)
+        self._set_col_series_on_df(col_name, df, series_to_set)
+
+    if type(df.index) == pd.MultiIndex and not self._disable_grouping:
+        previous_value = None
+        row_styles = {}
+        row_loc = from_index
+        for index, row in df.iterrows():
+            row_style = {}
+            last_row = row_loc == (len(self._df) - 1)
+            prev_idx = row_loc - 1
+            for idx, index_val in enumerate(index):
+                col_name = self._primary_key[idx]
+                if previous_value is None:
+                    row_style[col_name] = 'group-top'
+                    continue
+                elif index_val == previous_value[idx]:
+                    if prev_idx < 0:
+                        row_style[col_name] = 'group-top'
+                        continue
+                    if row_styles[prev_idx][col_name] == 'group-top':
+                        row_style[col_name] = 'group-middle'
+                    elif row_styles[prev_idx][col_name] == 'group-bottom':
+                        row_style[col_name] = 'group-top'
+                    else:
+                        row_style[col_name] = 'group-middle'
+                else:
+                    if last_row:
+                        row_style[col_name] = 'single'
+                    else:
+                        row_style[col_name] = 'group-top'
+                    if prev_idx >= 0:
+                        if row_styles[prev_idx][col_name] == \
+                                'group-middle':
+                            row_styles[prev_idx][col_name] = 'group-bottom'
+                        elif row_styles[prev_idx][col_name] == \
+                                'group-top':
+                            row_styles[prev_idx][col_name] = 'group-single'
+            previous_value = index
+            row_styles[row_loc] = row_style
+            row_loc += 1
+
+        self._row_styles = row_styles
+    else:
+        self._row_styles = {}
+
+    with warnings.catch_warnings():
+        warnings.simplefilter("ignore", category=UserWarning)
+        df_json = df.to_json(
+            None, orient="table", date_format="iso", double_precision=self.precision
+        )
+
+    if update_columns:
+        self._interval_columns = []
+        self._sort_helper_columns = {}
+        self._period_columns = []
+
+        # parse the schema that we just exported in order to get the
+        # column metadata that was generated by 'to_json'
+        parsed_json = json.loads(df_json)
+        df_schema = parsed_json['schema']
+
+        columns = {}
+        for i, cur_column in enumerate(df_schema['fields']):
+            col_name = cur_column['name']
+            if 'constraints' in cur_column and \
+                    isinstance(cur_column['constraints']['enum'][0], dict):
+                cur_column['type'] = 'interval'
+                self._interval_columns.append(col_name)
+
+            if 'freq' in cur_column and cur_column['type'] == 'periodindex':
+                self._period_columns.append(col_name)
+
+            if col_name in self._primary_key:
+                cur_column['is_index'] = True
+                cur_column['index_display_text'] = \
+                    self._primary_key_display[col_name]
+                if len(self._primary_key) > 0:
+                    cur_column['level'] = self._primary_key.index(col_name)
+                level = self._primary_key.index(col_name)
+                if level == 0:
+                    cur_column['first_index'] = True
+                if self._multi_index and \
+                        level == (len(self._primary_key) - 1):
+                    cur_column['last_index'] = True
+
+            cur_column['position'] = i
+            cur_column['field'] = col_name
+            cur_column['id'] = col_name
+            cur_column['cssClass'] = cur_column['type']
+
+            columns[col_name] = cur_column
+
+            columns[col_name].update(self.column_options)
+            if col_name in self.column_definitions.keys():
+                columns[col_name].update(self.column_definitions[col_name])
+
+        self._columns = columns
+
+    # special handling for interval columns: convert to a string column
+    # and then call 'to_json' again to get a new version of the table
+    # json that has interval columns replaced with text columns
+    if len(self._interval_columns) > 0:
+        for col_name in self._interval_columns:
+            col_series = self._get_col_series_from_df(col_name,
+                                                      df,
+                                                      level_vals=True)
+            col_series_as_strings = col_series.map(lambda x: str(x))
+            self._set_col_series_on_df(col_name, df,
+                                       col_series_as_strings)
+
+    # special handling for period index columns: call to_timestamp to
+    # convert the series to a datetime series before displaying
+    if len(self._period_columns) > 0:
+        for col_name in self._period_columns:
+            sort_column_name = self._sort_helper_columns.get(col_name)
+            if sort_column_name:
+                series_to_set = df[sort_column_name]
+            else:
+                temp = self._get_col_series_from_df(
+                    col_name, df, level_vals=True
+                )
+                series_to_set = self._get_col_series_from_df(
+                    col_name, df, level_vals=True
+                ).to_timestamp()
+            self._set_col_series_on_df(col_name, df, series_to_set)
+
+    # and then call 'to_json' again to get a new version of the table
+    # json that has interval columns replaced with text columns
+    if len(self._interval_columns) > 0 or len(self._period_columns) > 0:
+        df_json = pd_json.to_json(None, df,
+                                  orient='table',
+                                  date_format='iso',
+                                  double_precision=self.precision)
+
+    self._df_json = df_json
+
+    if self.row_edit_callback is not None:
+        editable_rows = {}
+        for index, row in df.iterrows():
+            editable_rows[int(row[self._index_col_name])] = \
+                self.row_edit_callback(row)
+        self._editable_rows = editable_rows
+
+    if fire_data_change_event:
+        self._notify_listeners({
+            'name': 'json_updated',
+            'triggered_by': triggered_by,
+            'range': self._df_range
+        })
+        data_to_send = {
+            'type': 'update_data_view',
+            'columns': self._columns,
+            'triggered_by': triggered_by
+        }
+        if scroll_to_row:
+            data_to_send['scroll_to_row'] = scroll_to_row
+        self.send(data_to_send)
 
 
 # Alias for legacy support, since we changed the capitalization
