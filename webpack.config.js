@@ -69,16 +69,16 @@ module.exports = [
             path: path.resolve(__dirname, 'lib'),
             libraryTarget: 'amd'
         },
-        devtool: 'source-map',
+        devtool: 'eval-source-map',
         module: {
             rules: rules
         },
         resolve: {
             extensions: ['.ts', '.js']
         },
-        externals: ['@jupyter-widgets/base', '@jupyter-widgets/controls'],
+        externals: ['@jupyterlab/apputils', '@jupyter-widgets/base', '@jupyter-widgets/controls', '@jupyterlab/notebook', '@jupyterlab/services'],
         plugins: plugins,
-        mode: 'production'
+        mode: 'development'
     },
     {// Embeddable xellgrid bundle
      //
@@ -101,7 +101,7 @@ module.exports = [
             libraryTarget: 'amd',
             publicPath: 'https://unpkg.com/xellgrid@' + version + '/dist/'
         },
-        devtool: 'source-map',
+        devtool: 'eval-source-map',
         module: {
             rules: rules
         },
@@ -110,6 +110,6 @@ module.exports = [
         },
         externals: ['@jupyter-widgets/base', '@jupyter-widgets/controls'],
         plugins: plugins,
-        mode: 'production'
+        mode: 'development'
     }
 ];

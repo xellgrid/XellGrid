@@ -745,3 +745,9 @@ input.bool-filter-radio {
 .jupyter-widgets {
   overflow: auto !important;
 }
+
+.xell-tab{
+  background: white;
+	outline: 0;
+	border: 1px solid gray;
+}

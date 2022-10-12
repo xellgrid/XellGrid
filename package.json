@@ -76,8 +76,8 @@
     "jquery": "^3.2.1",
     "jquery-datepicker": "^1.12.3",
     "jquery-ui-dist": "^1.12.1",
-    "moment": "^2.24.0",
     "jqueryui": "^1.11.1",
+    "moment": "^2.24.0",
     "slickgrid": "2.4.44",
     "ts-loader": "~8.2.0",
     "underscore": "^1.9.2"
@@ -95,7 +95,9 @@
   ],
   "jupyterlab": {
     "extension": true,
-    "outputDir": "xellgrid/labextension"
+    "outputDir": "xellgrid/labextension",
+    "schemaDir": "schema"
   },
+  
   "styleModule": "style/index.js"
 }

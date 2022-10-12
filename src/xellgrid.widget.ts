@@ -38,6 +38,9 @@ class MainMenu {
   public settings: any;
   public mask: any;
   public timeOut: any;
+  public toggleMenuItem: any;
+  public toggleSubMenu: any;
+  public closeMainMenu:any;
 
   constructor(){
     this.activated = false;
@@ -279,17 +282,28 @@ export class XellgridView extends widgets.DOMWidgetView {
   public init_df: any;
   public ul: any;
   public li: any;
+  public first_tab_name: any;
+  public data_layer: any;
+
   render() {
     // subscribe to incoming messages from the QGridWidget
     this.model.on('msg:custom', this.handle_msg, this);
+    var tabs = this.model.get('tabs');
+    console.log('tabs', tabs);
+    
+    this.data_layer = tabs;
+    this.first_tab_name = Object.keys(tabs)[0]
+    console.log("first_tab_name", this.first_tab_name);
+    
     this.initialize_xellgrid();
     var that = this;
     $(document).ready(function(){
       that.tabs.tabs()
-      let module_array = that.model.get('_df_json');
-      module_array.slice(1).forEach((element: any) => {
-        xell_slick_grid.create_new_grid(that.model, that, element);
-      });
+      for (var key in tabs) {
+        if(key !== that.first_tab_name){
+          xell_slick_grid.create_new_grid(tabs[key], that, tabs[key]._df_json);
+        }
+      }
       that.tabs.tabs("refresh")
     })
     
@@ -299,7 +313,7 @@ export class XellgridView extends widgets.DOMWidgetView {
    * Main entry point for drawing the widget,
    * including toolbar buttons if necessary.
    */
-  initialize_xellgrid() {
+  initialize_xellgrid(){
     this.$el.empty();
     if (!this.$el.hasClass('xell-grid-container')){
       this.$el.addClass('xell-grid-container');
@@ -320,7 +334,7 @@ export class XellgridView extends widgets.DOMWidgetView {
     
     this.li = $(`
       <li class="ui-tabs-tab ui-corner-top ui-state-default ui-tab">
-            <a href="#tabs-1" class="ui-tabs-anchor">Grid 1</a></li>
+            <a href="#tabs-1" class="ui-tabs-anchor">Grid ${this.first_tab_name}</a></li>
     `).appendTo(this.ul)
 
     this.tab.appendTo(this.tab_wrapper)
@@ -336,7 +350,7 @@ export class XellgridView extends widgets.DOMWidgetView {
   }
 
   initialize_toolbar() {
-    if (!this.model.get('show_toolbar')){
+    if (!this.model.get('tabs')[this.first_tab_name].show_toolbar){
       this.tab.removeClass('show-toolbar');
     } else {
       this.tab.addClass('show-toolbar');
@@ -440,7 +454,7 @@ export class XellgridView extends widgets.DOMWidgetView {
     this.window_dropdown_menu.main_menu_bar.click((event: any) => {
       let target = $(event.target);
       if (!target.hasClass('active-menu') && !target.parents().hasClass('active-menu')) {
-        this.send({'type': event.target.getAttribute("value")})
+        this.send({'type': event.target.getAttribute("value"), 'title': this.model.get('tabs')[this.first_tab_name].title})
       }
     });
 
@@ -453,19 +467,18 @@ export class XellgridView extends widgets.DOMWidgetView {
    * type of data in the columns of the DataFrame provided by the user.
    */
   initialize_slick_grid() {
-
+    console.log("this.model", this.model)
     if (!this.grid_elem) {
       this.grid_elem = $("<div class='xell-grid'>").appendTo(this.tab);
     }
-    
-    var df_json = JSON.parse(this.model.get('_df_json')[0]);
+    var df_json = JSON.parse(this.model.get('tabs')[this.first_tab_name]._df_json);
     
     this.init_df = df_json;
-    var columns = this.model.get('_columns');
+    var columns = this.model.get('tabs')[this.first_tab_name]._columns;
     this.data_view = this.create_data_view(df_json.data);
-    this.grid_options = this.model.get('grid_options');
-    this.index_col_name = this.model.get("_index_col_name");
-    this.row_styles = this.model.get("_row_styles");
+    this.grid_options = this.model.get('tabs')[this.first_tab_name].grid_options;
+    this.index_col_name = this.model.get('tabs')[this.first_tab_name]._index_col_name;
+    this.row_styles = this.model.get('tabs')[this.first_tab_name]._row_styles;
 
     this.columns = [];
     this.index_columns = [];
@@ -750,7 +763,8 @@ export class XellgridView extends widgets.DOMWidgetView {
       var msg = {
         'type': 'change_sort',
         'sort_field': this.sorted_column.field,
-        'sort_ascending': this.sort_ascending
+        'sort_ascending': this.sort_ascending,
+        'title': this.model.get('tabs')[this.first_tab_name].title
       };
       this.send(msg);
     };
@@ -767,21 +781,22 @@ export class XellgridView extends widgets.DOMWidgetView {
       commandItems: [
         { command: "remove_row", title: "Delete A Row",
           action: (e: any, args: any) => {
-            this.send({'type': "remove_row"})
+            this.send({'type': "remove_row", 'title': this.model.get('tabs')[this.first_tab_name].title})
           }
         },
         { command: "add_empty_row", title: "Add An Empty Row", iconImage: "", cssClass: "bold", textCssClass: "red",
           action: (e: any, args: any) => {
             this.send({
               'type': "add_empty_row",
-              'row': args.row
+              'row': args.row,
+              'title': this.model.get('tabs')[this.first_tab_name].title
             })
           }
         },
         { 
           command: "add_row", title: "Duplicate Last Row", iconImage: "", cssClass: "bold", textCssClass: "red",
           action: (e: any, args: any) => {
-            this.send({'type': "add_row"})
+            this.send({'type': "add_row", 'title': this.model.get('tabs')[this.first_tab_name].title})
           }
         },
         {
@@ -869,13 +884,19 @@ export class XellgridView extends widgets.DOMWidgetView {
       }
       this.viewport_timeout = setTimeout(() => {
         this.last_vp = this.slick_grid.getViewport();
-        var cur_range = this.model.get('_viewport_range');
-
+        
+        var cur_range = this.model.get('tabs')[this.first_tab_name]._viewport_range;
+        console.log("this.last_vp ", this.last_vp);
+        console.log("cur_range ", cur_range);
+        console.log("this.next_viewport_msg", this.next_viewport_msg);
+        
+        
         if (this.last_vp.top != cur_range[0] || this.last_vp.bottom != cur_range[1]) {
           var msg = {
             'type': 'change_viewport',
             'top': this.last_vp.top,
-            'bottom': this.last_vp.bottom
+            'bottom': this.last_vp.bottom,
+            'title': this.first_tab_name
           };
           if (this.vp_response_expected){
             this.next_viewport_msg = msg
@@ -889,10 +910,10 @@ export class XellgridView extends widgets.DOMWidgetView {
     });
 
     // set up callbacks
-    let editable_rows = this.model.get('_editable_rows');
+    let editable_rows = this.model.get('tabs')[this.first_tab_name]._editable_rows;
     if (editable_rows && Object.keys(editable_rows).length > 0) {
       this.slick_grid.onBeforeEditCell.subscribe((e: any, args: any) => {
-        editable_rows = this.model.get('_editable_rows');
+        editable_rows = this.model.get('tabs')[this.first_tab_name]._editable_rows;
         return editable_rows[args.item[this.index_col_name]]
       });
     }
@@ -900,7 +921,8 @@ export class XellgridView extends widgets.DOMWidgetView {
     this.slick_grid.onCellChange.subscribe((e: any, args: any) => {
       var column = this.columns[args.cell].name;
       var data_item = this.slick_grid.getDataItem(args.row);
-      var msg = {'row_index': data_item.row_index, 'column': column,
+      var msg = {'title': this.model.get('tabs')[this.first_tab_name].title,
+                 'row_index': data_item.row_index, 'column': column,
                  'unfiltered_index': data_item[this.index_col_name],
                  'value': args.item[column], 'type': 'edit_cell'};
       this.send(msg);
@@ -908,7 +930,7 @@ export class XellgridView extends widgets.DOMWidgetView {
 
     this.slick_grid.onSelectedRowsChanged.subscribe((e: any, args: any) => {
       if (!this.ignore_selection_changed) {
-        var msg = {'rows': args.rows, 'type': 'change_selection'};
+        var msg = {'rows': args.rows, 'type': 'change_selection', 'title': this.model.get('tabs')[this.first_tab_name].title};
         this.send(msg);
       }
     });
@@ -933,7 +955,6 @@ export class XellgridView extends widgets.DOMWidgetView {
         }, 1);
       });
     }, 1);
-
   }
 
   processPhosphorMessage(msg: any) {
@@ -963,8 +984,8 @@ export class XellgridView extends widgets.DOMWidgetView {
    * including toolbar buttons if necessary.
    */
   create_data_view(df: any) {
-    let df_range = this.df_range = this.model.get("_df_range");
-    let df_length = this.df_length = this.model.get("_row_count");
+    let df_range = this.df_range = this.model.get('tabs')[this.first_tab_name]._df_range;
+    let df_length = this.df_length = this.model.get('tabs')[this.first_tab_name]._row_count;
     return {
       getLength: () => {
         return df_length;
@@ -1036,7 +1057,7 @@ export class XellgridView extends widgets.DOMWidgetView {
    */
   handle_msg(msg: any) {
     console.log(msg);
-    
+    // var current_tab = this.model.get('tabs')[msg.title]
     if (msg.type === 'draw_table') {
       this.initialize_slick_grid();
     } else if (msg.type == 'show_error') {
@@ -1046,6 +1067,7 @@ export class XellgridView extends widgets.DOMWidgetView {
         this.reset_in_progress_button();
       }
     } else if (msg.type == 'update_data_view') {
+      
       if (this.buttons) {
         if (this.has_active_filter()) {
           this.buttons.addClass('disabled');
@@ -1059,13 +1081,15 @@ export class XellgridView extends widgets.DOMWidgetView {
         clearTimeout(this.update_timeout);
       }
       this.update_timeout = setTimeout(() => {
-        var df_json = JSON.parse(this.model.get('_df_json'));
-        this.row_styles = this.model.get("_row_styles");
-        this.multi_index = this.model.get("_multi_index");
+        var df_json = JSON.parse(this.model.get('tabs')[msg.title]._df_json);
+        this.row_styles = this.model.get('tabs')[msg.title]._row_styles;
+        this.multi_index = this.model.get('tabs')[msg.title]._multi_index;
         var data_view = this.create_data_view(df_json.data);;
         
         if (msg.triggered_by === 'change_viewport') {
           if (this.next_viewport_msg) {
+            console.log("this.next_viewport_msg", this.next_viewport_msg);
+            
             this.send(this.next_viewport_msg);
             this.next_viewport_msg = null;
             return;
@@ -1075,7 +1099,7 @@ export class XellgridView extends widgets.DOMWidgetView {
         }
 
         if (msg.triggered_by == 'change_sort' && this.sort_indicator) {
-          var asc = this.model.get('_sort_ascending');
+          var asc = this.model.get('tabs')[msg.title]._sort_ascending;
           this.sort_indicator.removeClass(
               'fa-spinner fa-spin fa-sort-asc fa-sort-desc'
           );
@@ -1130,7 +1154,8 @@ export class XellgridView extends widgets.DOMWidgetView {
         });
         this.send({
           'rows': selected_rows,
-          'type': 'change_selection'
+          'type': 'change_selection',
+          'title': this.model.get('tabs')[msg.title].title
         });
       }, 100);
     } else if (msg.type == 'change_grid_option') {

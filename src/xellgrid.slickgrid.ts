@@ -14,7 +14,7 @@ class MainMenu {
     public settings: any;
     public mask: any;
     public timeOut: any;
-  
+    
     constructor(){
       this.activated = false;
   
@@ -278,7 +278,7 @@ function update_size(grid_options: any, data_view: any, grid_elem: any, slick_gr
 
 
 function initialize_toolbar(model: any, tab: any, widget: any) {
-    if (!model.get('show_toolbar')){
+    if (!model.show_toolbar){
       tab.removeClass('show-toolbar');
     } else {
       tab.addClass('show-toolbar');
@@ -369,7 +369,7 @@ function bind_toolbar_events(window_dropdown_menu: any, widget: any) {
       }
       else{
         // If there are no submenus, close main menu.
-        that.main_menu.closeMainMenu();
+        // that.main_menu.closeMainMenu();
       }
     });
 
@@ -417,11 +417,11 @@ export function create_new_grid(model: any, xellGrid: XellgridView, json_df: any
     var slick_grid: any = null;
     let df_json = JSON.parse(json_df);
     
-    let columns = model.get('_columns');
-    let data_view = create_data_view(df_json.data, model.get("_df_range"), model.get("_row_count"));
-    let grid_options = model.get('grid_options');
-    let index_col_name = model.get("_index_col_name");
-    let row_styles = model.get("_row_styles");
+    let columns = model._columns;
+    let data_view = create_data_view(df_json.data, model._df_range, model._row_count);
+    let grid_options = model.grid_options;
+    let index_col_name = model._index_col_name;
+    let row_styles = model._row_styles;
 
     let df_columns: any = [];
     let index_columns: any = [];
@@ -708,7 +708,8 @@ export function create_new_grid(model: any, xellGrid: XellgridView, json_df: any
       var msg = {
         'type': 'change_sort',
         'sort_field': xellGrid.sorted_column.field,
-        'sort_ascending': xellGrid.sort_ascending
+        'sort_ascending': xellGrid.sort_ascending,
+        'title': model.title
       };
       xellGrid.send(msg);
     };
@@ -725,21 +726,24 @@ export function create_new_grid(model: any, xellGrid: XellgridView, json_df: any
       commandItems: [
         { command: "remove_row", title: "Delete A Row",
           action: (e: any, args: any) => {
-            xellGrid.send({'type': "remove_row"})
+            xellGrid.send({'type': "remove_row",
+                           'title': model.title})
           }
         },
         { command: "add_empty_row", title: "Add An Empty Row", iconImage: "", cssClass: "bold", textCssClass: "red",
           action: (e: any, args: any) => {
             xellGrid.send({
               'type': "add_empty_row",
-              'row': args.row
+              'row': args.row,
+              'title': model.title
             })
           }
         },
         { 
           command: "add_row", title: "Duplicate Last Row", iconImage: "", cssClass: "bold", textCssClass: "red",
           action: (e: any, args: any) => {
-            xellGrid.send({'type': "add_row"})
+            xellGrid.send({'type': "add_row",
+                           'title': model.title})
           }
         },
         {
@@ -752,7 +756,8 @@ export function create_new_grid(model: any, xellGrid: XellgridView, json_df: any
         {
           command: "delete_current_tab", title: "Delete Current Tab", iconImage: "", cssClass: "", textCssClass: "",
           action: (e: any, args: any) => {
-            xellGrid.send({'type': "delete_current_tab"})
+            xellGrid.send({'type': "delete_current_tab",
+                           'title': model.title})
           }
         },
         {
@@ -834,13 +839,14 @@ export function create_new_grid(model: any, xellGrid: XellgridView, json_df: any
         last_vp = slick_grid.getViewport();
         console.log("last_vp", last_vp);
         
-        var cur_range = model.get('_viewport_range');
+        var cur_range = model._viewport_range;
 
         if (last_vp.top != cur_range[0] || last_vp.bottom != cur_range[1]) {
           var msg = {
             'type': 'change_viewport',
             'top': last_vp.top,
-            'bottom': last_vp.bottom
+            'bottom': last_vp.bottom,
+            'title': model.title
           };
           if (vp_response_expected){
             // next_viewport_msg = msg
@@ -855,10 +861,10 @@ export function create_new_grid(model: any, xellGrid: XellgridView, json_df: any
     });
 
     // set up callbacks
-    let editable_rows = model.get('_editable_rows');
+    let editable_rows = model._editable_rows;
     if (editable_rows && Object.keys(editable_rows).length > 0) {
       slick_grid.onBeforeEditCell.subscribe((e: any, args: any) => {
-        editable_rows = model.get('_editable_rows');
+        editable_rows = model._editable_rows;
         return editable_rows[args.item[index_col_name]]
       });
     }
@@ -868,13 +874,15 @@ export function create_new_grid(model: any, xellGrid: XellgridView, json_df: any
       var data_item = slick_grid.getDataItem(args.row);
       var msg = {'row_index': data_item.row_index, 'column': column,
                  'unfiltered_index': data_item[index_col_name],
-                 'value': args.item[column], 'type': 'edit_cell'};
+                 'value': args.item[column], 'type': 'edit_cell',
+                 'title': model.title};
       xellGrid.send(msg);
     });
 
     slick_grid.onSelectedRowsChanged.subscribe((e: any, args: any) => {
       if (!ignore_selection_changed) {
-        var msg = {'rows': args.rows, 'type': 'change_selection'};
+        var msg = {'rows': args.rows, 'type': 'change_selection',
+                   'title': model.title};
         xellGrid.send(msg);
       }
     });
@@ -903,5 +911,5 @@ export function create_new_grid(model: any, xellGrid: XellgridView, json_df: any
     // $("div#xellgrid-tabs").tabs("refresh");
     // xellGrid.tabs.tabs("refresh"))
     // xellGrid.tabs.resizeCanvas()
-    return `Grid${num}`
+    return slick_grid
   }
