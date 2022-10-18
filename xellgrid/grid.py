@@ -92,13 +92,6 @@ class DataLayer(HasTraits):
         self.title = kwargs["title"]
         self.df = kwargs['df']
         self.widget = kwargs['widget']
-        # self.tabs[kwargs["title"]] = self.id
-        # self._initialized = False
-        # super().__init__(*args, **kwargs)
-        
-        # register a callback for custom messages
-        # self.on_msg(self._handle_xellgrid_msg)
-        # self._initialized = True
         self._handlers = EventHandlers()
 
         handlers.notify_listeners({
@@ -107,8 +100,6 @@ class DataLayer(HasTraits):
         
         if self.df is not None:
             self._update_df()
-            # print("self", self)
-            # XellTabs.add_widget(self.id, self)
         
     def _grid_options_default(self):
         return defaults.grid_options
@@ -965,8 +956,6 @@ class DataLayer(HasTraits):
             old_viewport_range = self._viewport_range
             self._viewport_range = (content['top'], content['bottom'])
 
-            print("old_viewport_range ", old_viewport_range)
-            print("self._viewport_range ", self._viewport_range)
             # if the viewport didn't change, do nothing
             if old_viewport_range == self._viewport_range:
                 return
@@ -1404,11 +1393,11 @@ class XellgridWidget(widgets.DOMWidget):
     _view_module_version = Unicode('^1.1.3').tag(sync=True)
     _model_module_version = Unicode('^1.1.3').tag(sync=True)
     
+    grid_counter = 1
     tabs = Dict({}, sync=True)
     data_layer_object = {}
 
     def _handle_xellgrid_msg(self, widget, content, buffers=None):
-        print("_handle_xellgrid_msg content: ", content)
         try:
             data_layer = self.data_layer_object[content['title']]
             data_layer._handle_xellgrid_msg_helper(content)
@@ -1422,11 +1411,12 @@ class XellgridWidget(widgets.DOMWidget):
     def initialize_dfs(self, *args, **kwargs):
         tabs = {}
         for _ in range(3):
-            title = str(uuid.uuid4()).split("-")[0]
+            title = str(self.grid_counter)
             data_layer = DataLayer(title=title, widget=self, *args, **kwargs)
             data_layer._initialized = False
             tabs[title] = data_layer.to_dict(('_unfiltered_df', '_df', '_handlers', 'row_edit_callback'))
             self.data_layer_object[title] = data_layer
+            self.grid_counter += 1
         self.tabs = tabs
 
     def __init__(self, *args, **kwargs):

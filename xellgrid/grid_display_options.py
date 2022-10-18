@@ -275,8 +275,6 @@ def add_tab(title: str = str(uuid.uuid4()).split("-")[0],
     #     XellTabs.add_widget(title, widget)
     # else:
     return XellgridWidget(df=get_default_df())
-    return show_grid(get_default_df(), title=title)
-    # return XellTabs.get_tabs()
 
 
 def get_widget(title: str) -> DOMWidget:
