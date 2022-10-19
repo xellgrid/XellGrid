@@ -335,7 +335,7 @@ class DataLayer(HasTraits):
         
     def _rebuild_widget(self):
         self._update_render_df()
-        self.widget.sent({'type': 'draw_table'})
+        self.widget.send({'type': 'draw_table'})
 
     def _df_changed(self):
         """Build the Data Table for the DataFrame."""
@@ -1466,7 +1466,7 @@ def update_table(self, update_columns=False, triggered_by=None, scroll_to_row=No
         }
         if scroll_to_row:
             data_to_send['scroll_to_row'] = scroll_to_row
-        self.widget.sent(data_to_send)
+        self.widget.send(data_to_send)
 
 
 # Alias for legacy support, since we changed the capitalization
