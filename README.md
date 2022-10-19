@@ -1,9 +1,13 @@
-# XellGrid
+# What is XellGrid
 
-XellGrid is a project branched out of the discontinued Qgrid project. The first release of XellGrid is to add support to JupyterLab with enhanced UI.  
-
-Our goal is to create a powerful Jupyter enabled grid with rich "Excel" like UI features to enable regular users/analysts to benefit from 
-the computational power of Python and cloud analytics through "low code/no code" principles.    
+XellGrid is a Jupyter based grid widget extension that provides intuitive, powerful and fast data analysis and computationa functionalities for developers, data scientists, business analysts, and data analysts.    
+ 
+# Main Features 
+- Leverage computational power of Python and supports both advanced Python scripting and "low code/no code" practices   
+- Close integration with Pandas, one of the most popular Python data analysis packages 
+- "Excel" like user interfaces, supports multiple tabs and commonly used features like vlookup, pivot, etc.  
+- Built-in high performance computation engine and support super size (100G+) data analysis and manipulation 
+- Supports both cloud based and local resource based computation, significatly reduce cloud computation cost    
 
 ## Install
 ---------
