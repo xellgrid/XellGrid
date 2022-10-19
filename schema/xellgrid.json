@@ -1,8 +1,0 @@
-{
-    "jupyter.lab.toolbars": {
-        "Notebook": [ 
-          { "name": "run", "command": "xellgrid:add_tab", "rank":0 }
-        ]
-    },
-    "type": "object"
-}
