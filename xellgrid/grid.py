@@ -103,23 +103,15 @@ class DataLayer(HasTraits):
     show_toolbar = Bool(False, sync=True)
     id = Unicode('', sync=True) 
     title = Unicode('', sync=True)
+    
     def __init__(self, core_df=None, *args, **kwargs):
+        start_time_init = time.time()
         self.id = kwargs["title"]
         self.title = kwargs["title"]
         self.df = kwargs['df']
         self.widget = kwargs['widget']
-        start_time_init = time.time()
+        
         self._core_df = core_df
-        # self._initialized = False
-
-        # performance monitor
-        start_time_constructor = time.time()
-        # super().__init__(*args, **kwargs)
-        end_time_constructor = time.time()
-        logging.debug("constructor took: %s seconds", end_time_constructor - start_time_constructor)
-
-        # register a callback for custom messages
-        # self.on_msg(self._handle_xellgrid_msg)
         self._initialized = True
         self._handlers = EventHandlers()
 
