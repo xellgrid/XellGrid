@@ -15,14 +15,12 @@ export class FilterBase {
 	public disabled_tooltip_showing: any;
 	public prev_column_separator: any;
 
-  constructor(field:any, column_type:any, xellgrid:any) {
+  constructor(field:any, column_type:any, xellgrid:any, data_layer: any) {
     this.field = field;
     this.column_type = column_type;
     this.xellgrid = xellgrid;
     this.widget_model = xellgrid.model;
-    if (this.widget_model) {
-      this.precision = this.widget_model.get('precision');
-    }
+    this.precision = data_layer.precision;
     this.has_multiple_values = true;
   }
 

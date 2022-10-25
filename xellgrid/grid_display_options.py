@@ -57,6 +57,7 @@ def disable():
 
 
 def show_grid(data_frame,
+              title = str(uuid.uuid4()).split("-")[0],
               show_toolbar=None,
               precision=None,
               grid_options=None,
@@ -282,11 +283,10 @@ def add_tab(title: str = str(uuid.uuid4()).split("-")[0],
     kwargs: dict
         arguments into show_grid()
     """
-    if isinstance(widget, DOMWidget):
-        XellTabs.add_widget(title, widget)
-    else:
-        XellTabs.add_widget(title, show_grid(get_default_df(), **kwargs))
-    return XellTabs.get_tabs()
+    # if isinstance(widget, DOMWidget):
+    #     XellTabs.add_widget(title, widget)
+    # else:
+    return XellgridWidget(df=get_default_df())
 
 
 def get_widget(title: str) -> DOMWidget:

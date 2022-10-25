@@ -1,3 +1,5 @@
+from os import sync
+import uuid
 import ipywidgets as widgets
 import logging
 import pandas as pd
@@ -6,7 +8,9 @@ import numpy as np
 import time
 import json
 import warnings
+from copy import deepcopy
 
+from ipywidgets import Tab
 from types import FunctionType
 from traitlets import (
     Unicode,
@@ -16,10 +20,13 @@ from traitlets import (
     Dict,
     List,
     Tuple,
-    Any
+    Any,
+    HasTraits
 )
 
 from uuid import uuid4
+
+from xellgrid.xell_tabs import XellTabs
 
 from .common.dataframe_utils import zero_out_dataframe
 from .grid_default_settings import defaults
@@ -43,55 +50,7 @@ PAGE_SIZE = 100
 LOGGER = logging.getLogger()
 LOGGER.setLevel(logging.DEBUG)
 
-
-@widgets.register()
-class XellgridWidget(widgets.DOMWidget):
-    """
-    The widget class which is instantiated by the ``show_grid`` method. This
-    class can be constructed directly but that's not recommended because
-    then default options have to be specified explicitly (since default
-    options are normally provided by the ``show_grid`` method).
-
-    The constructor for this class takes all the same parameters as
-    ``show_grid``, with one exception, which is that the required
-    ``data_frame`` parameter is replaced by an optional keyword argument
-    called ``df``.
-
-    See Also
-    --------
-    show_grid : The method that should be used to construct XellgridWidget
-                instances, because it provides reasonable defaults for all
-                of the XellGrid options.
-
-    Attributes
-    ----------
-    df : DataFrame
-        Get/set the DataFrame that's being displayed by the current instance.
-        This DataFrame will NOT reflect any sorting/filtering/editing
-        changes that are made via the UI. To get a copy of the DataFrame that
-        does reflect sorting/filtering/editing changes, use the
-        ``get_changed_df()`` method.
-    grid_options : dict
-        Get/set the grid options being used by the current instance.
-    precision : integer
-        Get/set the precision options being used by the current instance.
-    show_toolbar : bool
-        Get/set the show_toolbar option being used by the current instance.
-    column_options : bool
-        Get/set the column options being used by the current instance.
-    column_definitions : bool
-        Get/set the column definitions (column-specific options)
-        being used by the current instance.
-
-    """
-
-    _view_name = Unicode('XellgridView').tag(sync=True)
-    _model_name = Unicode('XellgridModel').tag(sync=True)
-    _view_module = Unicode('xellgrid').tag(sync=True)
-    _model_module = Unicode('xellgrid').tag(sync=True)
-    _view_module_version = Unicode('^1.1.3').tag(sync=True)
-    _model_module_version = Unicode('^1.1.3').tag(sync=True)
-
+class DataLayer(HasTraits):
     _df = Instance(pd.DataFrame)
     _df_json = Unicode('', sync=True)
     _primary_key = List()
@@ -142,23 +101,17 @@ class XellgridWidget(widgets.DOMWidget):
     column_definitions = Dict({})
     row_edit_callback = Instance(FunctionType, sync=False, allow_none=True)
     show_toolbar = Bool(False, sync=True)
-    id = Unicode(sync=True)
-
+    id = Unicode('', sync=True) 
+    title = Unicode('', sync=True)
+    
     def __init__(self, core_df=None, *args, **kwargs):
-
         start_time_init = time.time()
+        self.id = kwargs["title"]
+        self.title = kwargs["title"]
+        self.df = kwargs['df']
+        self.widget = kwargs['widget']
+        
         self._core_df = core_df
-        self.id = str(uuid4())
-        self._initialized = False
-
-        # performance monitor
-        start_time_constructor = time.time()
-        super().__init__(*args, **kwargs)
-        end_time_constructor = time.time()
-        logging.debug("constructor took: %s seconds", end_time_constructor - start_time_constructor)
-
-        # register a callback for custom messages
-        self.on_msg(self._handle_xellgrid_msg)
         self._initialized = True
         self._handlers = EventHandlers()
 
@@ -236,81 +189,81 @@ class XellgridWidget(widgets.DOMWidget):
         * **filter_changed** The user changed the filter setting for a column.
 
             * **column** The name of the column for which the filter setting
-              was changed.
+            was changed.
 
         * **filter_dropdown_shown** The user showed the filter control for a
-          column by clicking the filter icon in the column's header.
+        column by clicking the filter icon in the column's header.
 
             * **column** The name of the column for which the filter control
-              was shown.
+            was shown.
 
         * **json_updated** A user action causes XellgridWidget to send rows of
-          data (in json format) down to the browser. This happens as a side
-          effect of certain actions such as scrolling, sorting, and filtering.
+        data (in json format) down to the browser. This happens as a side
+        effect of certain actions such as scrolling, sorting, and filtering.
 
             * **triggered_by** The name of the event that resulted in
-              rows of data being sent down to the browser.  Possible values
-              are ``change_viewport``, ``change_filter``, ``change_sort``,
-              ``add_row``, ``remove_row``, and ``edit_cell``.
+            rows of data being sent down to the browser.  Possible values
+            are ``change_viewport``, ``change_filter``, ``change_sort``,
+            ``add_row``, ``remove_row``, and ``edit_cell``.
             * **range** A tuple specifying the range of rows that have been
-              sent down to the browser.
+            sent down to the browser.
 
         * **row_added** The user added a new row using the "Add Row" button
-          in the grid toolbar.
+        in the grid toolbar.
 
             * **index** The index of the newly added row.
             * **source** The source of this event.  Possible values are
-              ``api`` (an api method call) and ``gui`` (the grid interface).
+            ``api`` (an api method call) and ``gui`` (the grid interface).
 
         * **row_removed** The user added removed one or more rows using the
-          "Remove Row" button in the grid toolbar.
+        "Remove Row" button in the grid toolbar.
 
             * **indices** The indices of the removed rows, specified as an
-              array of integers.
+            array of integers.
             * **source** The source of this event.  Possible values are
-              ``api`` (an api method call) and ``gui`` (the grid interface).
+            ``api`` (an api method call) and ``gui`` (the grid interface).
 
         * **selection_changed** The user changed which rows were highlighted
-          in the grid.
+        in the grid.
 
             * **old** An array specifying the indices of the previously
-              selected rows.
+            selected rows.
             * **new** The indices of the rows that are now selected, again
-              specified as an array.
+            specified as an array.
             * **source** The source of this event.  Possible values are
-              ``api`` (an api method call) and ``gui`` (the grid interface).
+            ``api`` (an api method call) and ``gui`` (the grid interface).
 
         * **sort_changed** The user changed the sort setting for the grid.
 
             * **old** The previous sort setting for the grid, specified as a
-              dict with the following keys:
+            dict with the following keys:
 
                 * **column** The name of the column that the grid was sorted by
                 * **ascending** Boolean indicating ascending/descending order
 
             * **new** The new sort setting for the grid, specified as a dict
-              with the following keys:
+            with the following keys:
 
                 * **column** The name of the column that the grid is currently
-                  sorted by
+                sorted by
                 * **ascending** Boolean indicating ascending/descending order
 
         * **text_filter_viewport_changed** The user scrolled the new rows
-          into view in the filter dropdown for a text field.
+        into view in the filter dropdown for a text field.
 
             * **column** The name of the column whose filter dropdown is
-              visible
+            visible
             * **old** A tuple specifying the previous range of visible rows
-              in the filter dropdown.
+            in the filter dropdown.
             * **new** A tuple specifying the range of rows that are now
-              visible in the filter dropdown.
+            visible in the filter dropdown.
 
         * **viewport_changed** The user scrolled the new rows into view in
-          the grid.
+        the grid.
 
             * **old** A tuple specifying the previous range of visible rows.
             * **new** A tuple specifying the range of rows that are now
-              visible.
+            visible.
 
         The ``event`` dictionary for every type of event will contain a
         ``name`` key specifying the name of the event that occurred.  That
@@ -358,7 +311,7 @@ class XellgridWidget(widgets.DOMWidget):
 
         # make a copy of the user's dataframe
         self._df = self.df.copy()
-
+        
         # insert a column which we'll use later to map edits from
         # a filtered version of this df back to the unfiltered version
         self._df.insert(0, self._index_col_name, range(0, len(self._df)))
@@ -371,10 +324,10 @@ class XellgridWidget(widgets.DOMWidget):
 
         update_table(self, update_columns=True, fire_data_change_event=False)
         self._ignore_df_changed = False
-
+        
     def _rebuild_widget(self):
         self._update_render_df()
-        self.send({'type': 'draw_table'})
+        self.widget.send({'type': 'draw_table'})
 
     def _df_changed(self):
         """Build the Data Table for the DataFrame."""
@@ -395,8 +348,7 @@ class XellgridWidget(widgets.DOMWidget):
     def _show_toolbar_changed(self):
         if not self._initialized:
             return
-        self.send({'type': 'change_show_toolbar'})
-
+        self.widget.send({'type': 'change_show_toolbar', 'title': self.title})
 
 
     def _update_sort(self):
@@ -428,7 +380,7 @@ class XellgridWidget(widgets.DOMWidget):
                 self._disable_grouping = True
         except TypeError:
             self.log.info('TypeError occurred, assuming mixed data type '
-                          'column')
+                        'column')
             # if there's a TypeError, assume it means that we have a mixed
             # type column, and attempt to create a stringified version of
             # the column to use for sorting/filtering
@@ -478,7 +430,7 @@ class XellgridWidget(widgets.DOMWidget):
         # we'll use that sort column for all subsequent sorts/filters.
         if col_name in self._period_columns:
             self._initialize_sort_column(col_name,
-                                         to_timestamp=True)
+                                        to_timestamp=True)
 
         col_series = self._get_col_series_from_df(col_name, df_for_unique)
         if 'is_index' in col_info:
@@ -487,27 +439,29 @@ class XellgridWidget(widgets.DOMWidget):
         if col_info['type'] in ['integer', 'number']:
             if 'filter_info' not in col_info or \
                     (col_info['filter_info']['min'] is None and
-                     col_info['filter_info']['max'] is None):
+                    col_info['filter_info']['max'] is None):
                 col_info['slider_max'] = max(col_series)
                 col_info['slider_min'] = min(col_series)
                 self._columns[col_name] = col_info
-            self.send({
+            self.widget.send({
                 'type': 'column_min_max_updated',
                 'field': col_name,
-                'col_info': col_info
+                'col_info': col_info,
+                'title': self.title
             })
             return
         elif col_info['type'] == 'datetime':
             if 'filter_info' not in col_info or \
                     (col_info['filter_info']['min'] is None and
-                     col_info['filter_info']['max'] is None):
+                    col_info['filter_info']['max'] is None):
                 col_info['filter_max'] = max(col_series)
                 col_info['filter_min'] = min(col_series)
                 self._columns[col_name] = col_info
-            self.send({
+            self.widget.send({
                 'type': 'column_min_max_updated',
                 'field': col_name,
-                'col_info': col_info
+                'col_info': col_info,
+                'title': self.title
             })
             return
         elif col_info['type'] == 'boolean':
@@ -519,10 +473,11 @@ class XellgridWidget(widgets.DOMWidget):
                         values.append(possible_val)
                 col_info['values'] = values
                 self._columns[col_name] = col_info
-            self.send({
+            self.widget.send({
                 'type': 'column_min_max_updated',
                 'field': col_name,
-                'col_info': col_info
+                'col_info': col_info,
+                'title': self.title
             })
             self.log.info('handled boolean type')
             return
@@ -568,7 +523,7 @@ class XellgridWidget(widgets.DOMWidget):
                 if selected_indices == 'all':
                     excluded_indices = col_filter_info['excluded'] or []
                     excluded_values = list(map(get_value_from_filter_table,
-                                               excluded_indices))
+                                            excluded_indices))
                     non_excluded_count = 0
                     for i in range(len(unique_list), 0, -1):
                         unique_val = unique_list[i - 1]
@@ -582,7 +537,7 @@ class XellgridWidget(widgets.DOMWidget):
                     col_info['values'] = unique_list
                 else:
                     selected_vals = list(map(get_value_from_filter_table,
-                                             selected_indices))
+                                            selected_indices))
                     col_info['selected_length'] = len(selected_vals)
 
                     in_selected = set(selected_vals)
@@ -621,20 +576,22 @@ class XellgridWidget(widgets.DOMWidget):
             else:
                 message_type = 'column_min_max_updated'
             try:
-                self.send({
+                self.widget.send({
                     'type': message_type,
                     'field': col_name,
-                    'col_info': col_info
+                    'col_info': col_info,
+                    'title': self.title
                 })
             except ValueError:
                 # if there's a ValueError, assume it's because we're
                 # attempting to serialize something that can't be converted
                 # to json, so convert all the values to strings.
                 col_info['values'] = map(str, col_info['values'])
-                self.send({
+                self.widget.send({
                     'type': message_type,
                     'field': col_name,
-                    'col_info': col_info
+                    'col_info': col_info,
+                    'title': self.title
                 })
 
     # get any column from a dataframe, including index columns
@@ -671,7 +628,7 @@ class XellgridWidget(widgets.DOMWidget):
 
     def _append_condition_for_column(self, col_name, filter_info, conditions):
         col_series = self._get_col_series_from_df(col_name,
-                                                  self._unfiltered_df)
+                                                self._unfiltered_df)
         if filter_info['type'] == 'slider':
             if filter_info['min'] is not None:
                 conditions.append(col_series >= filter_info['min'])
@@ -791,13 +748,14 @@ class XellgridWidget(widgets.DOMWidget):
 
             except (ValueError, TypeError):
                 msg = "Error occurred while attempting to edit the " \
-                      "DataFrame. Check the notebook server logs for more " \
-                      "information."
+                    "DataFrame. Check the notebook server logs for more " \
+                    "information."
                 self.log.exception(msg)
-                self.send({
+                self.widget.send({
                     'type': 'show_error',
                     'error_msg': msg,
-                    'triggered_by': 'add_row'
+                    'triggered_by': 'add_row',
+                    'title': self.title
                 })
                 return
         elif content['type'] == 'change_selection':
@@ -853,10 +811,11 @@ class XellgridWidget(widgets.DOMWidget):
             col_info['viewport_range'] = (content['top'], content['bottom'])
 
             self._columns[col_name] = col_info
-            self.send({
+            self.widget.send({
                 'type': 'update_data_view_filter',
                 'field': col_name,
-                'col_info': col_info
+                'col_info': col_info,
+                'title': self.title
             })
             self._notify_listeners({
                 'name': 'text_filter_viewport_changed',
@@ -1012,11 +971,12 @@ class XellgridWidget(widgets.DOMWidget):
         required_cols = set(df.columns.values).union({df.index.name}) - {self._index_col_name}
         if set(col_names) != required_cols:
             msg = "Cannot add row -- column names don't match in " \
-                  "the existing dataframe"
-            self.send({
+                "the existing dataframe"
+            self.widget.send({
                 'type': 'show_error',
                 'error_msg': msg,
-                'triggered_by': 'add_row'
+                'triggered_by': 'add_row',
+                'title': self.title
             })
             return
 
@@ -1144,9 +1104,10 @@ class XellgridWidget(widgets.DOMWidget):
         if send_msg_to_js:
             data_to_send = {
                 'type': 'change_selection',
-                'rows': rows
+                'rows': rows,
+                'title': self.title
             }
-            self.send(data_to_send)
+            self.widget.send(data_to_send)
 
         self._notify_listeners({
             'name': 'selection_changed',
@@ -1176,11 +1137,104 @@ class XellgridWidget(widgets.DOMWidget):
             The new value for the grid option.
         """
         self.grid_options[option_name] = option_value
-        self.send({
+        self.widget.send({
             'type': 'change_grid_option',
             'option_name': option_name,
-            'option_value': option_value
+            'option_value': option_value,
+            'title': self.title
         })
+    
+    def to_dict(self, skip=()):
+        out_dict = {}
+        for key in self.trait_names():
+            if key in skip:
+                continue
+            out_dict[key] = (getattr(self, key))
+        return out_dict
+
+@widgets.register()
+class XellgridWidget(widgets.DOMWidget):
+    """
+    The widget class which is instantiated by the ``show_grid`` method. This
+    class can be constructed directly but that's not recommended because
+    then default options have to be specified explicitly (since default
+    options are normally provided by the ``show_grid`` method).
+
+    The constructor for this class takes all the same parameters as
+    ``show_grid``, with one exception, which is that the required
+    ``data_frame`` parameter is replaced by an optional keyword argument
+    called ``df``.
+
+    See Also
+    --------
+    show_grid : The method that should be used to construct XellgridWidget
+                instances, because it provides reasonable defaults for all
+                of the XellGrid options.
+
+    Attributes
+    ----------
+    df : DataFrame
+        Get/set the DataFrame that's being displayed by the current instance.
+        This DataFrame will NOT reflect any sorting/filtering/editing
+        changes that are made via the UI. To get a copy of the DataFrame that
+        does reflect sorting/filtering/editing changes, use the
+        ``get_changed_df()`` method.
+    grid_options : dict
+        Get/set the grid options being used by the current instance.
+    precision : integer
+        Get/set the precision options being used by the current instance.
+    show_toolbar : bool
+        Get/set the show_toolbar option being used by the current instance.
+    column_options : bool
+        Get/set the column options being used by the current instance.
+    column_definitions : bool
+        Get/set the column definitions (column-specific options)
+        being used by the current instance.
+    tabs : dict
+        Get/Set titles for each df, values is the id of the instance of df
+    """
+
+    _view_name = Unicode('XellgridView').tag(sync=True)
+    _model_name = Unicode('XellgridModel').tag(sync=True)
+    _view_module = Unicode('xellgrid').tag(sync=True)
+    _model_module = Unicode('xellgrid').tag(sync=True)
+    _view_module_version = Unicode('^1.1.3').tag(sync=True)
+    _model_module_version = Unicode('^1.1.3').tag(sync=True)
+    
+    grid_counter = 1
+    tabs = Dict({}, sync=True)
+    data_layer_object = {}
+
+    def _handle_xellgrid_msg(self, widget, content, buffers=None):
+        try:
+            data_layer = self.data_layer_object[content['title']]
+            data_layer._handle_xellgrid_msg_helper(content)
+            tabs = deepcopy(self.tabs)
+            tabs[data_layer.title] = data_layer.to_dict(('_unfiltered_df', '_df', 'df', '_handlers', 'row_edit_callback'))
+            self.tabs = tabs
+        except Exception as e:
+            self.log.error(e)
+            self.log.exception("Unhandled exception while handling msg")
+
+    def initialize_dfs(self, *args, **kwargs):
+        tabs = {}
+        for _ in range(3):
+            title = str(self.grid_counter)
+            data_layer = DataLayer(title=title, widget=self, *args, **kwargs)
+            data_layer._initialized = False
+            tabs[title] = data_layer.to_dict(('_unfiltered_df', '_df', '_handlers', 'row_edit_callback'))
+            self.data_layer_object[title] = data_layer
+            self.grid_counter += 1
+        self.tabs = tabs
+
+    def __init__(self, *args, **kwargs):
+        self.id = str(uuid4())
+        super().__init__(*args, **kwargs)
+        self.initialize_dfs(*args, **kwargs)
+        self.on_msg(self._handle_xellgrid_msg)
+        for data_layer in self.data_layer_object.values():
+            data_layer._initialized = True 
+
 
 
 def update_table(self, update_columns=False, triggered_by=None, scroll_to_row=None, fire_data_change_event=True):
@@ -1399,11 +1453,12 @@ def update_table(self, update_columns=False, triggered_by=None, scroll_to_row=No
         data_to_send = {
             'type': 'update_data_view',
             'columns': self._columns,
-            'triggered_by': triggered_by
+            'triggered_by': triggered_by,
+            'title': self.title,
         }
         if scroll_to_row:
             data_to_send['scroll_to_row'] = scroll_to_row
-        self.send(data_to_send)
+        self.widget.send(data_to_send)
 
 
 # Alias for legacy support, since we changed the capitalization
