@@ -1,13 +1,14 @@
 # What is XellGrid
 
-XellGrid is a Jupyter based grid widget extension that provides intuitive, powerful and fast data analysis and computationa functionalities for developers, data scientists, business analysts, and data analysts.    
+XellGrid is a Jupyter based grid application that provides intuitive, powerful and fast data analysis and computationa functionalities for developers, data scientists, business analysts, and data analysts. It is compatible with multiple data table structures including Pandas, PyArrow, Dask, etc. 
  
 # Main Features 
-- Leverage computational power of Python and supports both advanced Python scripting and "low code/no code" practices   
+- Leverage computational power of Python ecosystems and supports both advanced Python scripting and "low code/no code" practices   
 - Close integration with Pandas, one of the most popular Python data analysis packages 
 - "Excel" like user interfaces, supports multiple tabs and commonly used features like vlookup, pivot, etc.  
 - Built-in high performance computation engine and support super size (100G+) data analysis and manipulation 
 - Supports both cloud based and local resource based computation, significatly reduce cloud computation cost    
+- Support smart data analysis scripting based on latest NLP advancements.
 
 ## Install
 ---------
