@@ -49,10 +49,16 @@ The `jlpm` command is JupyterLab's pinned version of
 # Clone the repo to your local environment
 # Change directory to the xellgrid directory
 # Install package in development mode
+python -m venv env && . env/bin/activate  # for linux environment
+pip install --upgrade pip
+pip install -r requirements-dev.txt
 pip install -e .
 # Link your development version of the extension with JupyterLab
 jupyter labextension develop . --overwrite
-# Rebuild extension Typescript source after making changes
+
+# Install frontend dependencies
+jlpm install
+# Build extension Typescript source after making changes
 jlpm run build
 ```
 
