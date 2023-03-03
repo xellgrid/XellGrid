@@ -42,16 +42,17 @@ class MainMenu {
   public toggleMenuItem: any;
   public toggleSubMenu: any;
   public closeMainMenu:any;
+  public title: string;
 
-  constructor(){
+  constructor(title: string){
     this.activated = false;
 
     this.settings = {
       disabledClass: 'disabled',
       submenuClass: 'submenu'
     }
-
-    this.mask = '<div id="menu-top-mask" style="height: 2px; background-color: #fff; z-index:1001;"/>';
+    this.title = title;
+    this.mask = `<div id="menu-top-mask ${this.title}" style="height: 2px; background-color: #fff; z-index:1001;"/>`;
     this.timeOut;
   }
 
@@ -63,14 +64,14 @@ class MainMenu {
       submenuClass: 'submenu'
     }
   
-    var mask = '<div id="menu-top-mask" style="height: 2px; background-color: #fff; z-index:1001;"/>';
+    var mask = `<div id="menu-top-mask ${this.title}" style="height: 2px; background-color: #fff; z-index:1001;"/>`;
     var timeOut: any;
 
     $.extend(settings, p);
 
     // var $mask = $('#menu-top-mask');
 
-    $('ul.main-menu > li').click(function (event) {
+    $(`ul.main-menu.${this.title} > li`).on('click', function (event) {
       var target = $(event.target);
       if (target.hasClass(settings.disabledClass) || target.parents().hasClass(settings.disabledClass) || target.hasClass(settings.submenuClass)) {
         return;
@@ -81,13 +82,13 @@ class MainMenu {
 
 
 
-    $('ul.main-menu > li').mouseenter(function () {
+    $(`ul.main-menu.${this.title} > li`).on('mouseenter',function () {
       if (activated && $(this).hasClass('active-menu') == false) {
         toggleMenuItem($(this));
       }
     });
 
-    $('ul.main-menu > li > ul li').mouseenter(function (e) {
+    $(`ul.main-menu.${this.title} > li > ul li`).on('mouseenter',function (e) {
       // Hide all other opened submenus in same level of this item
       var $el = $(e.target);
       if ($el.hasClass('separator')) return;
@@ -104,13 +105,13 @@ class MainMenu {
       }
     });
 
-    $('ul.main-menu > li > ul li').each(function () {
+    $(`ul.main-menu.${this.title} > li > ul li`).each(function () {
       if ($(this).children('ul').length > 0) {
         $(this).addClass(settings.submenuClass);
       }
     });
 
-    $('ul.main-menu li.' + settings.disabledClass).bind('click', function (e) {
+    $(`ul.main-menu.${this.title} li.` + settings.disabledClass).bind('click', function (e) {
       e.preventDefault();
     });
 
@@ -383,51 +384,50 @@ class DataLayer extends Backbone.View{
       return;
     }
 
-    this.toolbar = $("<div class='xell-grid-toolbar'>").appendTo(this.tab);
-
-    this.window_dropdown_menu = $(`
-    <div id="menu-bar" > 
-    <h1 style="text-align:center;color:#89CFF0;font-size:18px"> XellGrid </h1>
-  <ul class="main-menu">
-    <li id="menu-file"> File
-      <ul>
-        <li id="new_dataframe" value="new_value"> New DataFrame 
-        </li>
-        <li class="separator"></li>
-        <li class="icon save" value="save_dataframe"><a href="#">Save<span>Ctrl+S</span></a></li>
-        <li class="separator"></li>
-        <li class="disabled" value="open_dataframe"><a href="#">Open</a></li>
-        <li class="separator"></li>
-        <li class="icon print" value="save_code"><a href="#">Save Code<span>Ctrl+P</span></a></li>
-      </ul>
-    </li>
-    <li> Edit
-      <ul>
-        <li value="add_row">Duplicate Last Row</li>
-        <li value="add_empty_row">Create Empty Row</li>
-        <li class="separator"></li>
-        <li value="remove_row">Remove Row</li>
-        <li value="clear_history">Clear Edit History</li>
-      </ul>
-    </li>
-    <li> Sort/Filter
-      <ul>
-        <li value="filter_history"> Filter History</li>
-        <li value="reset_filters"> Reset Filters</li>
-        <li class="separator"></li>
-        <li value="reset_sort"> Reset Sort</li>
-      </ul>
-    </li>
-    <li> Help
-      <ul>
-        <li>Tips</li>
-      </ul>
-    </li>
-  </ul>
-  <!-- end mainmenu --> 
-</div>
+    this.toolbar = $(`<div class='xell-grid-toolbar ${this.data_layer.title}'>`).appendTo(this.tab);
     
-    `);
+    this.window_dropdown_menu = $(`
+    <div id="menu-bar ${this.data_layer.title}" > 
+    <h1 style="text-align:center;color:#89CFF0;font-size:18px"> XellGrid </h1>
+      <ul class="main-menu ${this.data_layer.title}">
+        <li id="menu-file"> File
+          <ul>
+            <li id="new_dataframe" value="new_value"> New DataFrame 
+            </li>
+            <li class="separator"></li>
+            <li class="icon save" value="save_dataframe"><a href="#">Save<span>Ctrl+S</span></a></li>
+            <li class="separator"></li>
+            <li class="" value="open_dataframe"><a href="#">Open</a></li>
+            <li class="separator"></li>
+            <li class="icon print" value="save_code"><a href="#">Save Code<span>Ctrl+P</span></a></li>
+          </ul>
+        </li>
+        <li> Edit
+          <ul>
+            <li value="add_row">Duplicate Last Row</li>
+            <li value="add_empty_row">Create Empty Row</li>
+            <li class="separator"></li>
+            <li value="remove_row">Remove Row</li>
+            <li value="clear_history">Clear Edit History</li>
+          </ul>
+        </li>
+        <li> Sort/Filter
+          <ul>
+            <li value="filter_history"> Filter History</li>
+            <li value="reset_filters"> Reset Filters</li>
+            <li class="separator"></li>
+            <li value="reset_sort"> Reset Sort</li>
+          </ul>
+        </li>
+        <li> Help
+          <ul>
+            <li>Tips</li>
+          </ul>
+        </li>
+      </ul>
+        <!-- end mainmenu --> 
+      </div>
+ `);
 
     this.window_dropdown_menu.appendTo(this.toolbar);
 
@@ -440,18 +440,18 @@ class DataLayer extends Backbone.View{
     var that = this
     let activated = false
     // this will find the element with class = main-menu
-    this.window_dropdown_menu.main_menu_bar = this.window_dropdown_menu.find('ul.main-menu');
+    this.window_dropdown_menu.main_menu_bar = this.window_dropdown_menu.find(`ul.main-menu.${this.data_layer.title}`);
     this.window_dropdown_menu.main_menu_bar.mouseenter((e: any) =>{
       if(activated === false)
       {
-        that.main_menu = new MainMenu();
+        that.main_menu = new MainMenu(that.data_layer.title);
         that.main_menu.init();
         activated = true
       }
     });
 
     
-    $('ul.main-menu > li > ul li').click(function (event) {
+    $(`ul.main-menu.${this.data_layer.title} > li > ul li`).click(function (event) {
 
       // Prevent click event to propagate to parent elements
       event.stopPropagation();
