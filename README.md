@@ -19,25 +19,13 @@ XellGrid is a Jupyter based grid application that provides intuitive, powerful a
 
 * JupyterLab >= 3.0
 
-## Install
+## Only Development Mode installation is supported at this time
 
-To install the extension, execute:
 
-```bash
-pip install xellgrid
-```
-
-## Uninstall
-
-To remove the extension, execute:
-
-```bash
-pip uninstall xellgrid
-```
+### Development install
 
 ## Running from source & testing your changes
 
-### Development install
 
 Note: You will need NodeJS to build the extension package.
 
