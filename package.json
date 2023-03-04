@@ -12,7 +12,7 @@
   "homepage": "Doesnot exist",
   "repository": {
     "type": "git",
-    "url": "https://github.com/Quantopian/xellgrid.git"
+    "url": "https://github.com/xellgrid/XellGrid/"
   },
   "keywords": [
     "jupyter",
