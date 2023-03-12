@@ -39,15 +39,13 @@ The `jlpm` command is JupyterLab's pinned version of
 # Install package in development mode
 python -m venv env && . env/bin/activate  # for linux environment
 pip install --upgrade pip
-pip install -r requirements-dev.txt
-pip install -e .
-# Link your development version of the extension with JupyterLab
-jupyter labextension develop . --overwrite
-
+pip install . && pip install -e .
 # Install frontend dependencies
 jlpm install
 # Build extension Typescript source after making changes
 jlpm run build
+
+pip install .
 ```
 
 You can watch the source directory and run JupyterLab at the same time in different terminals to watch for changes in the extension's source and automatically rebuild the extension.
