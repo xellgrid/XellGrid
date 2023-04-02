@@ -1250,7 +1250,6 @@ class DataLayer extends Backbone.View{
     } else if (msg.col_info) {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);
-    } else if (msg.type == 'asdf') {
     }
   }
 
