@@ -24,6 +24,7 @@ import 'style-loader!jquery-ui/themes/base/tabs.css'
 import './xellgrid.css'
 import './menu.css'
 import * as Backbone from 'backbone';
+
 // import xell_slick_grid = require('./xellgrid.slickgrid')
 
 // import { random } from 'underscore';
@@ -87,6 +88,7 @@ class MainMenu {
         toggleMenuItem($(this));
       }
     });
+
 
     $(`ul.main-menu.${this.title} > li > ul li`).on('mouseenter',function (e) {
       // Hide all other opened submenus in same level of this item
@@ -246,6 +248,7 @@ export class XellgridView extends widgets.DOMWidgetView {
 
   render() {
     // subscribe to incoming messages from the QGridWidget
+    window.slick_grid = {};
     this.model.on('msg:custom', this.handle_msg, this);
     this.data_layer = this.model.get('tabs');
     this.$el.empty();
@@ -397,7 +400,7 @@ class DataLayer extends Backbone.View{
             <li class="separator"></li>
             <li class="icon save" value="save_dataframe"><a href="#">Save<span>Ctrl+S</span></a></li>
             <li class="separator"></li>
-            <li class="" value="open_dataframe"><a href="#">Open</a></li>
+            <li class="" value="open_dataframe"><a id="open_file${this.data_layer.title}" >Open</a></li>
             <li class="separator"></li>
             <li class="icon print" value="save_code"><a href="#">Save Code<span>Ctrl+P</span></a></li>
           </ul>
@@ -429,7 +432,44 @@ class DataLayer extends Backbone.View{
       </div>
  `);
 
-    this.window_dropdown_menu.appendTo(this.toolbar);
+  const fileInput = $(`<input type="file" id="file_input"  data-instance-id="${this.data_layer.title}" accept=".csv" style="display:none">`);
+ 
+  $(document).off("click", `#open_file${this.data_layer.title}`).on("click", `#open_file${this.data_layer.title}`, () => {
+    // Trigger click event on the hidden file input element using HTMLElement's click() method
+    (fileInput[0] as HTMLInputElement).value = '';
+    (fileInput[0] as HTMLInputElement).click();
+  });
+
+  fileInput.off("change").on("change", (event: JQuery.ChangeEvent) => {
+    const file = (event.target as HTMLInputElement).files?.[0];
+    if (file) {
+      sendFileToBackend(file, this.data_layer.title);
+    }
+  });
+
+   const sendFileToBackend =async (file: File, title: string) => {
+    console.log("Sending file to backend")
+    const fileContents = await file.arrayBuffer();
+    const base64Data = btoa(String.fromCharCode(...new Uint8Array(fileContents)));
+
+    try {
+      var msg = {
+        'type': 'upload_file',
+        'title': title,
+        'data': base64Data,
+      };
+      this.widget.send(msg);
+
+    } catch (error) {
+      if (error instanceof Error) {
+        alert('Error uploading file: ' + error.message);
+      } else {
+        alert('Error uploading file: ' + String(error));
+      }
+    }
+  }
+
+  this.window_dropdown_menu.appendTo(this.toolbar);
 
 
 
@@ -483,6 +523,85 @@ class DataLayer extends Backbone.View{
 
 
   }
+
+  assignColumnsToSlickGrid(sorted_columns:any, type_infos:any, index_col_name:any, grid_options:any) {
+    const columns = [];
+    const index_columns = [];
+  
+    for (let cur_column of sorted_columns) {
+      if (cur_column.name == index_col_name) {
+        continue;
+      }
+  
+      const type_info = type_infos[cur_column.type] || {};
+  
+      const slick_column = cur_column;
+  
+      Object.assign(slick_column, type_info);
+  
+      if (cur_column.type == 'any') {
+        slick_column.editorOptions = {
+          options: cur_column.constraints.enum,
+        };
+      }
+  
+      if (slick_column.filter) {
+        const cur_filter = new slick_column.filter(
+          slick_column.field,
+          cur_column.type,
+          this.model,
+          this,
+        );
+        this.filters[slick_column.id] = cur_filter;
+        this.filter_list.push(cur_filter);
+      }
+  
+      if (cur_column.width == null) {
+        delete slick_column.width;
+      }
+  
+      if (cur_column.maxWidth == null) {
+        delete slick_column.maxWidth;
+      }
+  
+      // don't allow editing index columns
+      if (cur_column.is_index) {
+        slick_column.editor = editors.IndexEditor;
+  
+        if (cur_column.first_index) {
+          slick_column.cssClass += ' first-idx-col';
+        }
+        if (cur_column.last_index) {
+          slick_column.cssClass += ' last-idx-col';
+        }
+  
+        slick_column.name = cur_column.index_display_text;
+        slick_column.level = cur_column.level;
+  
+        if (grid_options.boldIndex) {
+          slick_column.cssClass += ' idx-col';
+        }
+  
+        index_columns.push(slick_column);
+        continue;
+      }
+  
+      if (cur_column.editable == false) {
+        slick_column.editor = null;
+      }
+  
+      columns.push(slick_column);
+    }
+  
+    if (index_columns.length > 0) {
+      return index_columns.concat(columns);
+    } else {
+      return columns;
+    }
+  }
+  
+
+
 
   /**
    * Create the grid portion of the widget, which is an instance of
@@ -612,80 +731,12 @@ class DataLayer extends Backbone.View{
     var sorted_columns = Object.values(columns).sort(
         (a: any, b: any) => a.position - b.position
     );
-    let cur_column: any 
-    for( cur_column of sorted_columns){
-      if (cur_column.name == this.index_col_name){
-        continue;
-      }
-
-      var type_info = this.type_infos[cur_column.type] || {};
-
-      var slick_column = cur_column;
-
-      Object.assign(slick_column, type_info);
-
-      if (cur_column.type == 'any'){
-        slick_column.editorOptions = {
-          options: cur_column.constraints.enum
-        };
-      }
-
-      if (slick_column.filter) {
-        var cur_filter = new slick_column.filter(
-            slick_column.field,
-            cur_column.type,
-            this.model,
-            this
-        );
-        this.filters[slick_column.id] = cur_filter;
-        this.filter_list.push(cur_filter);
-      }
-
-      if (cur_column.width == null){
-        delete slick_column.width;
-      }
-
-      if (cur_column.maxWidth == null){
-        delete slick_column.maxWidth;
-      }
-
-      // don't allow editing index columns
-      if (cur_column.is_index) {
-        slick_column.editor = editors.IndexEditor;
-        
-        if (cur_column.first_index){
-          slick_column.cssClass += ' first-idx-col';
-        }
-        if (cur_column.last_index){
-          slick_column.cssClass += ' last-idx-col';
-        }
-
-        slick_column.name = cur_column.index_display_text;
-        slick_column.level = cur_column.level;
-
-        if (this.grid_options.boldIndex) {
-            slick_column.cssClass += ' idx-col';
-        }
-
-        this.index_columns.push(slick_column);
-        continue;
-      }
-
-      if (cur_column.editable == false) {
-        slick_column.editor = null;
-      }
-
-      this.columns.push(slick_column);
-    }
-
-    if (this.index_columns.length > 0) {
-      this.columns = this.index_columns.concat(this.columns);
-    }
-
+    this.columns = this.assignColumnsToSlickGrid(sorted_columns, this.type_infos, this.index_col_name, this.grid_options)
+    
     // var row_count = 0;
 
     // set window.slick_grid for easy troubleshooting in the js console
-    window.slick_grid = this.slick_grid = new Slick.Grid(
+    window.slick_grid[String(this.data_layer.title)] = this.slick_grid = new Slick.Grid(
       this.grid_elem,
       this.data_view,
       this.columns,
@@ -1072,7 +1123,6 @@ class DataLayer extends Backbone.View{
    * Handle messages from the QGridWidget.
    */
   handle_msg(msg: any) {
-    
     // var current_tab = this.data_layer
     if (msg.type === 'draw_table') {
       this.initialize_slick_grid();
@@ -1097,6 +1147,14 @@ class DataLayer extends Backbone.View{
         clearTimeout(this.update_timeout);
       }
       this.update_timeout = setTimeout(() => {
+        let columns = this.model.get('tabs')[this.data_layer.title]._columns;
+        let index_col_name = this.model.get('tabs')[this.data_layer.title]._index_col_name;
+        let sorted_columns = Object.values(columns).sort(
+          (a: any, b: any) => a.position - b.position
+        );
+        let new_columns = this.assignColumnsToSlickGrid(sorted_columns, this.type_infos, index_col_name, this.grid_options);
+        this.columns = new_columns;
+        this.slick_grid.setColumns(new_columns);
         var df_json = JSON.parse(this.model.get('tabs')[this.data_layer.title]._df_json);
         this.row_styles = this.model.get('tabs')[this.data_layer.title]._row_styles;
         this.multi_index = this.model.get('tabs')[this.data_layer.title]._multi_index;
@@ -1104,7 +1162,6 @@ class DataLayer extends Backbone.View{
         
         if (msg.triggered_by === 'change_viewport') {
           if (this.next_viewport_msg) {
-            console.log("this.next_viewport_msg", this.next_viewport_msg);
             
             this.widget.send(this.next_viewport_msg);
             this.next_viewport_msg = null;
@@ -1193,6 +1250,7 @@ class DataLayer extends Backbone.View{
     } else if (msg.col_info) {
       var filter = this.filters[msg.col_info.name];
       filter.handle_msg(msg);
+    } else if (msg.type == 'asdf') {
     }
   }
 

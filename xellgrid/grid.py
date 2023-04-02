@@ -1,5 +1,7 @@
 from os import sync
-import uuid
+import io
+import base64
+
 import ipywidgets as widgets
 import logging
 import pandas as pd
@@ -854,6 +856,8 @@ class DataLayer(HasTraits):
                 'name': 'filter_changed',
                 'column': content['field']
             })
+        elif content['type'] == 'upload_file':
+            self._replace_df_by_data(content['data'])
 
     def _notify_listeners(self, event):
         # notify listeners at the module level
@@ -953,6 +957,27 @@ class DataLayer(HasTraits):
         update_table(self, triggered_by='add_empty_row',
                            scroll_to_row=self._df.index.get_loc(row_index))
 
+    def _replace_df_by_data(self, data):
+        """Replace current dataframe by data
+
+        Parameters
+        ----------
+            data (dict): data to replace current dataframe
+        """
+        
+        # Decode the base64-encoded string into a binary stream
+        binary_data = base64.b64decode(data)
+
+        # Create a BytesIO object from the binary data
+        data_stream = io.BytesIO(binary_data)
+
+        df = pd.read_csv(data_stream)
+        self._df = df
+        self._df.insert(0, self._index_col_name, range(0, len(self._df)))
+        self._unfiltered_df = self._df.copy()
+        self._sorted_column_cache = {}
+        update_table(self, update_columns=True, fire_data_change_event=True)
+    
     def _add_row(self, row):
         """
         Append a new row to the end of the DataFrame given a list of 2-tuples
@@ -1455,6 +1480,11 @@ def update_table(self, update_columns=False, triggered_by=None, scroll_to_row=No
             'columns': self._columns,
             'triggered_by': triggered_by,
             'title': self.title,
+            '_df_json': self._df_json,
+            '_row_count': self._row_count,
+            '_df_range': self._df_range,
+            '_columns': self._columns,
+            '_index_col_name': self._index_col_name,
         }
         if scroll_to_row:
             data_to_send['scroll_to_row'] = scroll_to_row
